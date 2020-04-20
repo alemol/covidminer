@@ -2,6 +2,9 @@
 Text Mining Emergent Library for Information Extraction from Medical Notes in Spanish during COVID-19 pandemic
 
 
+The script `demo.py` is the minimal code example in Python 3.
+
+
 ```
 from gems.covid import MedNotesMiner
 import simplejson as json
@@ -16,7 +19,7 @@ covid_insights =  json.dumps(covid_seeker.clues)
 print(covid_insights)
 ```
 
-Gives you:
+Gives:
 
 ```
 {
@@ -123,4 +126,80 @@ INFO:  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
 Then, with the server running you can now make POST requests sending PDF files.
 
 ![HTTP POST request example](images/post.png)
+
+
+## Dependencies
+
+For Python 3 dependencies see `requirements.txt`. A quick installation with pip is recommended.
+
+```
+pip install  -r requirements.txt
+```
+
+In addition to the Python 3 libraries it is required to install [tesseract] (https://github.com/tesseract-ocr/tesseract/wiki) and [Poppler] (https://poppler.freedesktop.org/) for OCR support.
+
+Mac:
+
+```
+$brew install tesseract
+$brew install tesseract-esp
+$brew install poppler
+```
+
+linux:
+
+```
+$sudo apt install tesseract-ocr
+$sudo apt-get install tesseract-ocr-spa
+sudo add-apt-repository -y ppa:cran/poppler
+sudo apt-get update
+sudo apt-get install -y libpoppler-cpp-dev
+```
+
+## Built With
+
+* [Wikidata] (https://www.wikidata.org/) - The free knowledge base with 82,849,340 data items that anyone can edit.
+* [Tesseract] (https://github.com/tesseract-ocr/tesseract/wiki) - An open source text recognition (OCR) Engine.
+* [Flask] (https://rometools.github.io/rome/) - The Python micro framework for building web applications.
+
+
+## Authors
+
+**Alejandro Molina-Villegas**
+
+* [dblp](https://dblp.uni-trier.de/pers/hd/m/Molina=Villegas:Alejandro)
+* [orcid](https://orcid.org/0000-0001-9398-8844)
+* [CONACyT-CentroGeo](http://mid.geoint.mx/site/integrante/id/15.html)
+
+See also the list of [contributors]() who participate in this project.
+
+## Institutions
+
+  * [CentroGeo] (https://www.centrogeo.org.mx/) - Centro de Investigación en Ciencias de Información Geoespacial.
+  * [GeoInt] (http://www.geoint.mx/) - Laboratorio Nacional de Geointeligencia.
+  * [DataLab] (http://datalab.geoint.mx/) - DataLab
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](docs/LICENSE) file for details. 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
 
