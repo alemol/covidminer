@@ -125,7 +125,7 @@ INFO:  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
 
 Then, with the server running you can now make POST requests sending PDF files.
 
-![HTTP POST request example](images/post.png)
+![HTTP POST request example](docs/post.png)
 
 
 ## Dependencies
