@@ -110,7 +110,7 @@ EGO_BAC, ESCASAS, x campo, 0/64,
 EN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.
 '''
 
-covid_symptoms = 'resources/sintomas.csv'
+covid_symptoms = 'resources/covid19_sintomas.csv'
 covid_sampling = 'resources/muestras.txt'
 covid_seeker = MedNotesMiner(texto_urgencia, covid_symptoms, covid_sampling)
 covid_seeker.check_symptoms()
