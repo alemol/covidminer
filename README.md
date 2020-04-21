@@ -113,9 +113,9 @@ sudo apt-get install -y libpoppler-cpp-dev
 
 ## Built With
 
-* [Wikidata] (https://www.wikidata.org/) - The free knowledge base with 82,849,340 data items that anyone can edit.
-* [Tesseract] (https://github.com/tesseract-ocr/tesseract/wiki) - An open source text recognition (OCR) Engine.
-* [Flask] (https://rometools.github.io/rome/) - The Python micro framework for building web applications.
+* [Wikidata](https://www.wikidata.org/) - The free knowledge base with 82,849,340 data items that anyone can edit.
+* [Tesseract](https://github.com/tesseract-ocr/tesseract/wiki) - An open source text recognition (OCR) Engine.
+* [Flask](https://rometools.github.io/rome/) - The Python micro framework for building web applications.
 
 
 ## Authors
@@ -130,9 +130,9 @@ See also the list of [contributors]() who participate in this project.
 
 ## Institutions
 
-  * [CentroGeo] (https://www.centrogeo.org.mx/) - Centro de Investigación en Ciencias de Información Geoespacial.
-  * [GeoInt] (http://www.geoint.mx/) - Laboratorio Nacional de Geointeligencia.
-  * [DataLab] (http://datalab.geoint.mx/) - DataLab
+  * [CentroGeo](https://www.centrogeo.org.mx/) - Centro de Investigación en Ciencias de Información Geoespacial.
+  * [GeoInt](http://www.geoint.mx/) - Laboratorio Nacional de Geointeligencia.
+  * [DataLab](http://datalab.geoint.mx/site/contacto.html#Core_Members) - DataLab
 
 ## License
 
