@@ -6,24 +6,45 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
-from tmining.utils import covid19_symptoms, covid19_sampling, covid19_comorbidities
+from tmining.utils import covid19, covid19_symptoms, covid19_sampling, covid19_comorbidities
 import re
 import simplejson as json
 
 
 class MedNotesMiner(object):
     """Medical notes data miner for Covid-19 insights"""
-    def __init__(self, text_utf8, symptoms_db=None, sampling_db=None, morbidities_db=None):
+    def __init__(self, text_utf8, covid19_db=None, symptoms_db=None, sampling_db=None, morbidities_db=None):
         super(MedNotesMiner, self).__init__()
         self.text = text_utf8
         self.clues = {'texto': self.text}
         self.lower_text = self.text.lower()
+        if not covid19_db:
+            self.covid19_db = covid19()
         if not symptoms_db:
             self.symptoms_db = covid19_symptoms()
         if not sampling_db:
             self.sampling_db = covid19_sampling()
         if not morbidities_db:
             self.morbidities_db = covid19_comorbidities()
+
+    def check_covid19(self, lower_case=True):
+        """match covid-19 mentions"""
+        self.clues['COVID-19'] = {}
+
+        # seek for covid matches
+        for (covid_key, covid_name) in self.covid19_db:
+            #TODO: method argumen contex_size
+            regex = r'((\w+\W+){0,5}\b'+covid_name+r'\b(\W+\w+){0,5})'
+            for covid_mention in re.finditer(regex, self.lower_text):
+                context_mention = '...'+(covid_mention.groups()[0]).replace('\n', ' ')+'...'
+                covid_info = {'mención':context_mention,
+                              'wikidata': 'https://www.wikidata.org/wiki/{}'.format(covid_key)}
+
+                if not covid_name in self.clues['COVID-19']:
+                    self.clues['COVID-19'][covid_name] = [covid_info]
+                    continue
+
+                self.clues['COVID-19'][covid_name].append(covid_info)
 
     def check_symptoms(self, lower_case=True):
         """match covid-19 symptoms"""

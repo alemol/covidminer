@@ -16,6 +16,7 @@ import pandas as pd
 # all paths to data resources are relative to the project home
 # this should be the only place to set them.
 HOME = str(Path(dirname(abspath(__file__))).parent)
+COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_COMORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
 COVID19_SAMPLING = 'resources/muestras.txt'
@@ -23,6 +24,10 @@ UPLOAD_DIRNAME = 'uploads'
 LOG_DIRNAME = 'log'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
 
+
+def covid19():
+    symptoms_path = join(HOME, COVID19_DATA)
+    return load_csv(symptoms_path)
 
 def covid19_symptoms():
     symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)

@@ -52,8 +52,8 @@ def upload_file():
 
 @app.route('/covid19', methods=["POST"])
 def covid19():
-    logging.info('*covid19*')
-    logging.info(request)
+    logging.info('*covid19 request.files*')
+    logging.info(request.files)
     # check if the post request has the file part
     if 'file' not in request.files:
         resp = jsonify({'message' : 'No file part in the request'})
@@ -88,6 +88,7 @@ def covid19():
     # symptoms stage
     covid_seeker = MedNotesMiner(ocred_text)
     try:
+        covid_seeker.check_covid19()
         covid_seeker.check_symptoms()
         covid_seeker.check_sampling()
         covid_seeker.check_comorbidities()

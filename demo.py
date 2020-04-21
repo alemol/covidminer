@@ -108,6 +108,7 @@ EN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.
 '''
 
 covid_seeker = MedNotesMiner(texto_urgencia)
+covid_seeker.check_covid19()
 covid_seeker.check_symptoms()
 covid_seeker.check_sampling()
 covid_seeker.check_comorbidities()
