@@ -1,0 +1,6 @@
+requests==2.22.0
+pytesseract==0.3.1
+flask
+pdf2image
+pandas
+simplejson
