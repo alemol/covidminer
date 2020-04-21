@@ -8,10 +8,29 @@
 
 import os
 import re
-from os.path import (join, exists)
+from os.path import (join, exists, dirname, abspath)
+from pathlib import Path
 from shutil import rmtree
 import pandas as pd 
 
+# all paths to data resources are relative to the project home
+# this should be the only place to set them.
+HOME = str(Path(dirname(abspath(__file__))).parent)
+COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
+COVID19_COMORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
+COVID19_SAMPLING = 'resources/muestras.txt'
+
+def covid19_symptoms():
+    symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)
+    return load_csv(symptoms_path)
+
+def covid19_comorbidities():
+    comorbidities_path = join(HOME, COVID19_COMORBIDITIES_DATA)
+    return load_csv(comorbidities_path)
+
+def covid19_sampling():
+    sampling_path = join(HOME, COVID19_SAMPLING)
+    return load_txt(sampling_path)
 
 def load_txt(filepath):
     with open(filepath) as f:

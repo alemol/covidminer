@@ -27,7 +27,7 @@ UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
 
 # For json's text encoding-decoding UTF-8
-app.config['JSON_AS_ASCII']=False
+app.config['JSON_AS_ASCII'] = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -93,9 +93,7 @@ def covid19():
         abort(500)
 
     # symptoms stage
-    covid_symptoms = './resources/covid19_sintomas.csv'
-    covid_sampling = './resources/muestras.txt'
-    covid_seeker = MedNotesMiner(ocred_text,covid_symptoms,covid_sampling)
+    covid_seeker = MedNotesMiner(ocred_text)
     try:
         covid_seeker.check_symptoms()
         covid_seeker.check_sampling()

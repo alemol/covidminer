@@ -6,20 +6,24 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
-from tmining.utils import load_csv, load_txt
+from tmining.utils import covid19_symptoms, covid19_sampling, covid19_comorbidities
 import re
 import simplejson as json
 
 
 class MedNotesMiner(object):
     """Medical notes data miner for Covid-19 insights"""
-    def __init__(self, text_utf8, symptoms_db, sampling_db):
+    def __init__(self, text_utf8, symptoms_db=None, sampling_db=None, morbidities_db=None):
         super(MedNotesMiner, self).__init__()
         self.text = text_utf8
         self.clues = {'texto': self.text}
         self.lower_text = self.text.lower()
-        self.symptoms_db = load_csv(symptoms_db)
-        self.sampling_db = load_txt(sampling_db)        
+        if not symptoms_db:
+            self.symptoms_db = covid19_symptoms()
+        if not sampling_db:
+            self.sampling_db = covid19_sampling()
+        if not morbidities_db:
+            self.morbidities_db = covid19_comorbidities()
 
     def check_symptoms(self, lower_case=True):
         """match covid-19 symptoms"""
