@@ -6,57 +6,110 @@ The script `demo.py` is the minimal code example in Python 3.
 
 
 ```
-from gems.covid import MedNotesMiner
+from tmining.covid import MedNotesMiner
 import simplejson as json
 
-covid_symptoms = 'resources/sintomas.csv'
-covid_sampling = 'resources/muestras.txt'
-covid_seeker = MedNotesMiner(text_string, covid_symptoms, covid_sampling)
+texto_urgencia = "Paciente masculino de 52 ..." # very long text
+
+covid_seeker = MedNotesMiner(texto_urgencia)
 covid_seeker.check_symptoms()
 covid_seeker.check_sampling()
+covid_seeker.check_comorbidities()
 
 covid_insights =  json.dumps(covid_seeker.clues)
 print(covid_insights)
+
 ```
 
 Gives:
 
 ```
 {
-  "texto": "NOTA DE INGRESO.\n\nPACIENTE MASCULINO DE 63 ANOS DE EDAD, QUIEN ACUDE POR SUS PROPIOS MEDIOS SIN FAMILIAR ACOMPANANTE.\nMOTIVO DE INGRESO: DIFICULTAD RESPIRATORIA.\n\nANTECEDENTES PERSONALES PATOLOGICOS. ENFERMEDADES CRONICO-DEGENERATIVAS:REFIERE DIABETES TIPO 2 DE 20 ANOS DE EVOLUCION\nTRATADA CON METFORMINA/GILBENCLAMIDA 1 CADA 8 HORAS, HIPERTENSION ARTERIAL SISTEMICA DE 20 ANOS DE EVOLUCION\nENTRATAMIENTO CON LOSARTAN 1 TABLETA CADA 12 HORAS. QUIRURGICOS: AMIGDALECTOMIA A LOS 8 ANOS DE EDAD REALIZADA EN EL\nHOSPITAL INFANTIL DE MEXICO SIN COMPLICACIONES , CIRUGIA DE TABIQUE NASAL HACE 10 ANOS , CIRUGIA EN OIDO IZQUIERDO HACE 30\n\nANOS NO RECUERDA MOTIVO SIN EMBARGO DERIVADO DE ELLO EL PACIENTE USA APARATO AUXILIAR PARA LA AUDICION, NIEGA ALERGICOS Y\nTRANSFUSIONALES. ETILISMO POSITIVO DESDE LOS 14 ANOS DE EDAD HASTA LOS 23 ANOS CON PATRON DE CONSUMO SEMANAL HASTA LA\nEMBRIAGUEZ SUSPENDIDO HACE 10 ANOS, TABAQUISMO POSITIVO DESDE LOS 14 ANOS DE EDAD A RAZON DE 1 CAJETILLA AL DIA SUSPENDIDO\nHACE 10 ANOS. TOXICOMANIAS INTERROGADAS Y NEGADAS.\n\nANTECEDENTES INFECTO CONTAGIOSOS PACIENTE CON ANTECEDENTE DE VIAJE A QUINTANA ROO HACE 20 DIAS. PACIENTE QUE NO CUENTA CON\nVACUNA DE INFLUENZA.\n\nPADECIMIENTO ACTUAL: INICIA EL DIA 21 OE MARZO CON ATAQUE AL ESTADO GENERAL UNA SEMANA DESPUES SE AGREGO FIEBRE\n\nCUANTIFICADA DE 37 * C ASI COMO ALTERACIONES DEL GUSTO Y EL OLFATO Y DISNEA DE MEDIANOS ESFUERZOS POR LO QUE ACUDE CON\nMEDICO PARTICULAR QUIEN INDICA MUPIROCINA (DEBIDO A MORDEDURA DE PERRO DEL DIA 16 DE MARZO) Y PARACETAMOL INDICANDO\nCONFINAMIENTO DESDE EL DIA 29 DE MARZO HASTA EL DIA DE HOY QUE PRESENTA AUMENTO DE LA DISNEA MOTIVO ACUDE A ESTA UNIDAD\nHOSPITALARIA PARA SU VALORACION.\n\nALA EXPLORACION FISICA: CON LOS SIGNOS VITALES: 120/70 MMHG. FRECUENCIA CARDIACA: 109 LPM. FRECUENCIA RESPIRATORIA: 22 RPM.\n\nSAT. O2 77 %. TEMP: 36.3°C\n\nALA EXPLORACION FISICA, SE ENCUENTRA PACIENTE DESPIERTO, ORIENTADO EN TIEMPO PERSONA Y ESPACIO. FUNCIONES MENTALES SUPERIORES\nCONSERVADAS, TEGUMENTOS MODERADAMENTE DESHIDRATADOS. CRANEO: SIN PALPAR ENDOSTOSIS NI EXOSTOSIS Y SIN DETECTAR\nCREPITACIONES. APARATO AUDITIVO AUXILIAR IZQUIERDO, PUPILAS ISOCORICAS Y NORMORREFLEXICAS, ESCLEROTICAS SIN HIPEREMIA . NARINAS\nPERMEABLES, MUCOSAS ORALES DESHIDRATADAS. PUPILAS ISOCORICAS Y NORMORREFLEXICAS A ESTIMULO LUMINOSO. CUELLO INTEGRO, LARGO,\nCILINDRICO Y SIN ADENOMEGALIAS CERVICALES, SIN DATOS DE INGURGITACION YUGULAR. TORAX INTEGRO, NORMOLINEO CON AUMENTO DELOS\nMOVIMIENTOS DE AMPLEXION AMPLEXACION, HIPOVENTILADO EN EN AREAS BASALES DE FORMA BILATERAL AUSCULTANDOSE ESTERTORES FINOS,\nNO SE AUSCULTAN SIBILANCIAS, INTEGRANDO SINDROME PLEUROPULMONAR DE TIPO CONSOLIDACION. AREA CARDIACA CON RUIDOS RITMICOS\n\nY SINCRONICOS CON AUMENTO DE TONO E INTENSIDAD. ABDOMEN GLOBOSO A EXPENSAS DE PANICULO ADIPOSO, PERISTALSIS DISMINUIDA EN\nFRECUENCIA E INTENSIDAD, SIN PALPAR VISCEROMEGALIAS, PUNTOS URETRALES MEDIOS NEGATIVOS. EXTREMIDADES TORACICAS INTEGRAS Y SIN\nALTERACIONES EN SUS ARCOS DE MOVILIDAD, LLENADO CAPILAR 2 SEGUNDOS. EXTREMIDADES INFERIORES: SIN EDEMA, CON PULSOS\nPERIFERICOS PRESENTES EN BUEN TONO INTENSIDAD, CON LLENADO CAPILAR INMEDIATO Y PRESENCIA DE LESION EN PIERNA IZQUIERDA DE 4 CM\nCON SECRECION DE FIBRINA SIN DATOS DE INFECCION AL MOMENTO DELA EXPLORACION.\n\nPACIENTE DE LA SEPTIMA DECADA DE LA VIDA QUIEN CUMPLE CON DEFINICION OPERACIONAL PARA CASO SOSPECHOSO POR COVID-19,\nPRESENTANDO SATURACION DE OXIGENO AL 77% ADEMAS DE DATOS CLINICOS DE DIFICULTAD RESPIRATORIA, POR LO QUE SE DECIDE SU\nINGRESO AL SERVICIO DE URGENCIAS , PARA CONTINUAR CON PROTOCOLO DE ESTUDIO. Q-SOFA DE 1 PUNTO. NEWS-2 6 PUNTOS, LO QUE INDICA\nNECESIDAD DE MANEJO INTRAHOSPITALARIO. PACIENTE QUE PRESENTA HERIDA ANTIGUA POR MORDEDURA DE PERRO EN EXTREMIDAD PELVICA\nIZQUIERDA LIMPIA SIN DATOS DE INFECCION.\n\nSE INICIA MANEJO CON OXIGENO SUPLEMENTARIO CON BOLSA RESERVORIO ADEMAS DE SOLUCIONES CRISTALOIDES POR VIA PERIFERICA.\nOMEPRAZOL 40 MG. IV CADA 24 HRS. AZITROMICINA 500 MG. VO CADA 24 HRS. OSELTAMIVIR 75 MG, VO CADA 12 HRS. SE SOLICITAN Y SE\n\nTOMAN MUESTRAS PARA ESTUDIOS DE LABORATORIO, ASI COMO PANEL RESPIRATORIO PRUEBA PARA COVID 19 Y SE SOLICITA RADIOGRAFIA DE\nTORAX. DE IGUAL FORMA, SE LLENA FORMATO DE ESTUDIO EPIDEMIOLOGICO TANTO PARA INFLUENZA COMO PARA COVID-19. DEBIDO ALA\nSINTOMATOLOGIA DEL PACIENTE, NO SE DESCARTA MANEJO AVANZADO DE LA VIA AEREA A CORTO PLAZO, POR LO QUE SE INFORMA AL\nPACIENTE. SE REPORTA PACIENTE GRAVE CON PRONOSTICO RESERVADO A EVOLUCION NO EXCENTO DE COMPLICACIONES.\n\nIMPRESIONES DIAGNOSTICAS:\n\n1.INFECCION DE VIAS RESPIRATORIAS BAJAS\n\nNEUMONIA ATIPICA. 6 PUNTOS DE NEWS 2 RIESGO MODERADO. Q SOFA 1 PUNTO, CASO SOSPECHOSO PARA COVID 19\n2. DIABETES TIPO 2 EN TRATAMIENTO\n\n3. HIPERTENSION ARTERIAL SISTEMICA EN TRATAMIENTO",
+  "texto": "\nPaciente masculino de 52 afios de edad, quien acude a esta unidad acompajiado de familiar por sus propios medios.\nMotivo de ingreso: Dificultad respiratoria.\n\nAntecedentes Personales Patolégicos. Enfermedades Crénico-Degenerativas: diabetes mellitus tipo 2 desde hace 2 afios ocn mal apego a\ntratamiento ocn metformina 850 c/ 12 hrs. Alergias, traumaticos, hospitalizaciones interrogados y negados. Tabaquismo, alcoholismo,\ntoxicomanias; interrogadas y negadas.\n\nPadecimiento actual: Cuenta con antecedente de comienzo dia 26 de marzo 2020 con odinofagia sin fiebre ni tos ni rinorrea ni otros agregados\npor lo que acude a medico privado el cual dio tratamiento el cual no recuerda, sin presentar mejoria, posteriormente inicia el dia 27 de\n\nmarzo 2020, con exacerbacion del cuadro, agregandose cefalea tos fiebre no cuantificada se toma antipiretico y siente leve mejoria de la\nsintomatologia el dia 30 de marzo 2020 comienza con odinofagia intensa mialgias artralgias ataque al estado general y tos irritativa a la\nespiracion profunda , refieriendo disnea de pequefios esfuerzos motivo por el cual acude a valoracion medica.\n\nAla Exploracién Fisica: Con los Signos Vitales: 110/60 mmHg. Frecuencia Cardiaca: 84 Ipm. Frecuencia respiratoria: 36 respiraciones por minuto.\nSatO2 80%sin oxigeneo suplementario con oxigeno suplementario con mascarilla 5 Ipm 92%. Temp: 37.1 °C.\n\nPaciente con presencia d epolipnea, orientado en tiempo, lugar y espacio. Funciones mentales superiores conservadas. Tegumentos\ndeshidratados. Craneo: Sin palpar endostosis ni exostosis y sin detectar crepitaciones. Pupilas Isocéricas y normorrefléxicas, escleréticas sin\nhiperemia, Narinas permeables, mucosas orales deshidratadas. Cuello integro, corto, cilindrico y sin adenomegalias cervicales, sin datos de\ningurgitacién yugular. Térax integro, con polipnea aumento de la transmisién vocal hipoventilacién de lado izquierdo basal con presencia de\nestertores finos de predominio de lado derecho, sin integrar ningun sindrome pleuropulmonar. Area cardiaca con ruidos ritmicos y sincrénicos\npero con aumento de tono e intensidad, Abdomen globoso a expensas de paniculo adiposo, normoperistalsis, sin palpar visceromegalias ni\ndespertar puntos dolorosos a la palpacién profunda, timpanismo en todo marco colénico. Extremidades tordcicas integras y sin alteraciones en\nsus arcos de movilidad, llenado capilar 2 segundos. Extremidades inferiores: sin edema, con pulsos periféricos presentes y sincrénicos, con\nllenado capilar 4 segundos.\n\nPARACLINICOS.\ngasometria que reporta: PH 7.49 CO2 26 LACT 1.3 HCO3 19 BE -3.5\n\nBH CREATCIN 164 FA 124.5 TRIG 239 AC URI 4.1 GLUC 298 ALB 3.5 TP 10.9 TPT 28.06 INR 1.07 FIBRINOGENO 850 NA 133 K 3.95 FOSF 1.9\nCREAT 1 UREA 57.5 BUN 26.39 ALB 3.5\n\nEGO GLUC 500 CET NEGATIVO ERIT 0.03 PORT 701 LEUC 0-5 PCMP ERIT 0-5 PCM\n\nRX DE TORAX con presencia de infiltrados basales de predominio derecho\n\nPaciente de la quinta década de la vida quien presenta, seguin definicién operacional: datos clinicos para caso sospechoso por COVID-19, por lo\n\nque se ingresa a zona de aislados, para continuar con protocolo de estudio. SOFA de 3 puntos con 7% de mortalidad CURB 65 2 con 2 puntos\nriesgo moderado 6.8% PSI DE 72 PUNTOS CLASE Ii MORTALIDAD 0.9% PAFI 216.6 por lo que cursa con una insuficncia respiratoria moderada. Se\ninicia manejo con soluciones cristaloides, quinolona de tercera generacion, inhibidor de neuroaminidasa, antipirético, cloroquina, heparina de\n\nbajo peso molecular, agregandose quinolona por proceso infeccioso a nivel urinario. Se realiza estudio epidemiologico para COVID-19. Se reporta\npaciente grave con pronéstico reservado a evolucién no excento de complicaciones.\n\nImpresiones diagnosticas:\n\n1.- SEPSIS SOFA 3 PUNTOS CURB 65 DE 2 PUNTOS PSI CLASE II\nNeumonia Atipica/ CASO SOSPECHOSO POR COVID-19\n\n2.Ineuficiencia respiratorias moderada PAFI 216.6\n3.desequilibrio acido base:\n\nacidosis metabolica no compensada\n\nalcalemia\n\n4. Diabtetes Mellitus tipo 2 Descontrolada\n\n\nResultados de Laboratorio\n\n\nAMY_AMY, 49.2, U/L, 28/100,\n\nBILIRRUBINAS\n\nPFH_BIl, 0.5, mg/dl, 0,2/1,\n\nCALCIO TOTAL\n\nES2_CA, 8.7, mg/dl, 8,4/10,2,\n\n\nTRIG_TRIG, 239,23, mg/dl,\nPéptido Natiuretico (BNP) Cuantitativa Prueba Rapida\nPCP_OBS, SIN MUESTRA, -,\nDimero D Cuantitativo prueba rapida\nPCP_OBS, SIN MUESTRA, -,\nPROCALCITONINA\n\nIGM_NOTA, SIN REACTIVO, -,\nBIOMETRIA HEMATICA\nBH_NOTA, SIN MUESTRA, -,\nGASOMETRIA ARTERIAL\nGASO_THbe, 10.6,\n\nEXAMEN GENERAL DE ORINA\nEGO_BAC, ESCASAS, x campo, 0/64,\n\n\nEN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.\n",
   "síntomas": {
+    "tos": [
+      {
+        "mención": "...con odinofagia sin fiebre ni tos ni rinorrea ni otros agregados...",
+        "wikidata": "https://www.wikidata.org/wiki/Q35805"
+      },
+      {
+        "mención": "...exacerbacion del cuadro, agregandose cefalea tos fiebre no cuantificada se toma...",
+        "wikidata": "https://www.wikidata.org/wiki/Q35805"
+      },
+      {
+        "mención": "...ataque al estado general y tos irritativa a la espiracion profunda...",
+        "wikidata": "https://www.wikidata.org/wiki/Q35805"
+      }
+    ],
     "fiebre": [
       {
-        "mención": "...semana despues se agrego fiebre  cuantificada de 37 * c...",
+        "mención": "...marzo 2020 con odinofagia sin fiebre ni tos ni rinorrea ni...",
         "wikidata": "https://www.wikidata.org/wiki/Q38933"
+      },
+      {
+        "mención": "...del cuadro, agregandose cefalea tos fiebre no cuantificada se toma antipiretico...",
+        "wikidata": "https://www.wikidata.org/wiki/Q38933"
+      }
+    ],
+    "cefalea": [
+      {
+        "mención": "...con exacerbacion del cuadro, agregandose cefalea tos fiebre no cuantificada se...",
+        "wikidata": "https://www.wikidata.org/wiki/Q86"
       }
     ],
     "disnea": [
       {
-        "mención": "...y el olfato y disnea de medianos esfuerzos por...",
-        "wikidata": "https://www.wikidata.org/wiki/Q188008"
-      },
-      {
-        "mención": "...presenta aumento de la disnea motivo acude a esta...",
+        "mención": "...a la espiracion profunda , refieriendo disnea de pequefios esfuerzos motivo por...",
         "wikidata": "https://www.wikidata.org/wiki/Q188008"
       }
     ],
     "dificultad respiratoria": [
       {
-        "mención": "...acompanante. motivo de ingreso: dificultad respiratoria.  antecedentes personales patologicos. enfermedades...",
-        "wikidata": "https://www.wikidata.org/wiki/Q188008"
-      },
-      {
-        "mención": "...de datos clinicos de dificultad respiratoria, por lo que se...",
+        "mención": "...propios medios. motivo de ingreso: dificultad respiratoria.  antecedentes personales patolégicos. enfermedades crénico...",
         "wikidata": "https://www.wikidata.org/wiki/Q188008"
       }
     ]
   },
   "muestreos": [
     {
-      "mención": "...solicitan y se  toman muestras para estudios de laboratorio..."
+      "mención": "...cuantitativa prueba rapida pcp_obs, sin muestra, -, dimero d cuantitativo prueba rapida..."
+    },
+    {
+      "mención": "...pcp_obs, sin muestra, -, procalcitonina  igm_nota, sin reactivo, -, biometria..."
+    },
+    {
+      "mención": "...hematica bh_nota, sin muestra, -, gasometria arterial gaso_thbe, 10.6..."
+    },
+    {
+      "mención": "...64,   en espera de recabar muestras para panel viral y covid..."
     }
-  ]
+  ],
+  "comorbilidad": {
+    "diabetes mellitus": [
+      {
+        "mención": "...personales patolégicos. enfermedades crénico-degenerativas: diabetes mellitus tipo 2 desde hace 2...",
+        "wikidata": "https://www.wikidata.org/wiki/Q12206"
+      }
+    ],
+    "diabetes": [
+      {
+        "mención": "...personales patolégicos. enfermedades crénico-degenerativas: diabetes mellitus tipo 2 desde hace...",
+        "wikidata": "https://www.wikidata.org/wiki/Q12206"
+      }
+    ],
+    "diabetes mellitus tipo 2": [
+      {
+        "mención": "...personales patolégicos. enfermedades crénico-degenerativas: diabetes mellitus tipo 2 desde hace 2 afios ocn...",
+        "wikidata": "https://www.wikidata.org/wiki/Q3025883"
+      }
+    ],
+    "tabaquismo": [
+      {
+        "mención": "...traumaticos, hospitalizaciones interrogados y negados. tabaquismo, alcoholismo, toxicomanias; interrogadas y negadas...",
+        "wikidata": "https://www.wikidata.org/wiki/Q662860"
+      }
+    ]
+  }
 }
 ```
 

@@ -8,8 +8,7 @@
 
 from tmining.covid import MedNotesMiner
 from tmining.ocr import TesseOCR
-
-from flask import (Flask, request, jsonify, redirect, render_template, abort)
+from tmining.utils import uploads_dir, allowed_file, log_file
 
 import os
 import logging
@@ -17,22 +16,16 @@ from logging import Formatter, FileHandler
 import simplejson as json
 import urllib.request
 from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify, redirect, render_template, abort
 
 
 app = Flask(__name__)
 
-# Globals
+# App Globals
 LANGUAGE = 'spa'
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
-
-# For json's text encoding-decoding UTF-8
 app.config['JSON_AS_ASCII'] = False
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = uploads_dir()
 
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -53,7 +46,7 @@ def upload_file():
         resp.status_code = 201
         return resp
     else:
-        resp = jsonify({'message' : 'Allowed file types are txt, pdf, png, jpg, jpeg, gif'})
+        resp = jsonify({'message' : 'Not Allowed file type'})
         resp.status_code = 400
         return resp
 
@@ -97,6 +90,7 @@ def covid19():
     try:
         covid_seeker.check_symptoms()
         covid_seeker.check_sampling()
+        covid_seeker.check_comorbidities()
         jsons =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
         return(jsons)
     except Exception as e:
@@ -132,16 +126,16 @@ def ocr():
 def internal_error(error):
     logging.error(str(error))
 
-# @app.errorhandler(404)
-# def not_found_error(error):
-#     logging.error(str(error))
+@app.errorhandler(404)
+def not_found_error(error):
+    logging.error(str(error))
 
-# #if not app.debug:
-file_handler = FileHandler('log/error.log')
-file_handler.setFormatter(
-    Formatter('%(asctime)s %(levelname)s: \
-        %(message)s [in %(pathname)s:%(lineno)d]')
-)
+if not app.debug:
+    log = log_file()
+    file_handler = FileHandler(log)
+    file_handler.setFormatter(
+        Formatter('%(asctime)s %(levelname)s: \
+            %(message)s [in %(pathname)s:%(lineno)d]'))
 
 #logging.basicConfig(format='INFO: %(message)s', level=logging.INFO)
 logging.basicConfig(format='INFO: %(message)s', level=logging.DEBUG)

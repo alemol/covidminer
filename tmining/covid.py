@@ -32,7 +32,7 @@ class MedNotesMiner(object):
         # seek for symptoms matches
         for (sympt_key, sympt_name) in self.symptoms_db:
             #TODO: method argumen contex_size
-            regex = r'((\w+\W+){0,4}\b'+sympt_name+r'\b(\W+\w+){0,4})'
+            regex = r'((\w+\W+){0,5}\b'+sympt_name+r'\b(\W+\w+){0,5})'
             for sympt_mention in re.finditer(regex, self.lower_text):
                 context_mention = '...'+(sympt_mention.groups()[0]).replace('\n', ' ')+'...'
                 # TODO: filter wikidata info selected
@@ -47,13 +47,35 @@ class MedNotesMiner(object):
 
                 self.clues['síntomas'][sympt_name].append(sympt_info)
 
+    def check_comorbidities(self, lower_case=True):
+        """match covid-19 comorbidities"""
+        self.clues['comorbilidad'] = {}
+
+        # seek for comorbidities matches
+        for (comorbidity_key, comorbidity_name) in self.morbidities_db:
+            #TODO: method argumen contex_size
+            regex = r'((\w+\W+){0,5}\b'+comorbidity_name+r'\b(\W+\w+){0,5})'
+            for morbid_mention in re.finditer(regex, self.lower_text):
+                context_mention = '...'+(morbid_mention.groups()[0]).replace('\n', ' ')+'...'
+                # TODO: filter wikidata info selected
+                # wikidict = get_entity_dict_from_api(comorbidity_key)
+                # external_info = wikidict['claims'] if 'claims' in wikidict else ''
+                comorbidity_info = {'mención':context_mention,
+                              'wikidata': 'https://www.wikidata.org/wiki/{}'.format(comorbidity_key)}
+
+                if not comorbidity_name in self.clues['comorbilidad']:
+                    self.clues['comorbilidad'][comorbidity_name] = [comorbidity_info]
+                    continue
+
+                self.clues['comorbilidad'][comorbidity_name].append(comorbidity_info)
+
     def check_sampling(self):
         """match covid-19 sampling mentions"""
         self.clues['muestreos'] = []
 
         # seek for sampling matches
         for sampling_cueword in self.sampling_db:
-            regex = r'((\w+\W+){0,4}\b'+sampling_cueword+r'\b(\W+\w+){0,4})'
+            regex = r'((\w+\W+){0,5}\b'+sampling_cueword+r'\b(\W+\w+){0,5})'
             for samp_mention in re.finditer(regex, self.lower_text):
                 context_mention = '...'+(samp_mention.groups()[0]).replace('\n', ' ')+'...'
                 self.clues['muestreos'].append({'mención': context_mention})

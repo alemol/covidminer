@@ -110,6 +110,7 @@ EN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.
 covid_seeker = MedNotesMiner(texto_urgencia)
 covid_seeker.check_symptoms()
 covid_seeker.check_sampling()
+covid_seeker.check_comorbidities()
 
 covid_insights =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
 print(covid_insights)

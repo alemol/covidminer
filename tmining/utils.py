@@ -19,6 +19,10 @@ HOME = str(Path(dirname(abspath(__file__))).parent)
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_COMORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
 COVID19_SAMPLING = 'resources/muestras.txt'
+UPLOAD_DIRNAME = 'uploads'
+LOG_DIRNAME = 'log'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
+
 
 def covid19_symptoms():
     symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)
@@ -63,3 +67,14 @@ def natural_keys(text):
     http://nedbatchelder.com/blog/200712/human_sorting.html
     '''
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
+
+def uploads_dir():
+    uploads_path = join(HOME, UPLOAD_DIRNAME)
+    return uploads_path
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def log_file():
+    log_path = join(HOME, LOG_DIRNAME, 'error.log')
+    return log_path
