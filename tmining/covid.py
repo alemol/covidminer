@@ -40,14 +40,15 @@ class MedNotesMiner(object):
             regex = r'((\w+\W+){0,5}\b'+covid_name+r'\b(\W+\w+){0,5})'
             for covid_mention in re.finditer(regex, self.lower_text):
                 context_mention = '...'+(covid_mention.groups()[0]).replace('\n', ' ')+'...'
-                covid_info = {'mención':context_mention,
+                covid_info = {'descripción': covid_name,
+                              'mención': context_mention,
                               'wikidata': '{}{}'.format(self.wikidata_url, covid_key)}
 
-                if not covid_name in self.clues['COVID-19']:
-                    self.clues['COVID-19'][covid_name] = [covid_info]
+                if not covid_key in self.clues['COVID-19']:
+                    self.clues['COVID-19'][covid_key] = [covid_info]
                     continue
 
-                self.clues['COVID-19'][covid_name].append(covid_info)
+                self.clues['COVID-19'][covid_key].append(covid_info)
 
     def check_symptoms(self, lower_case=True):
         """match covid-19 symptoms"""
@@ -63,7 +64,7 @@ class MedNotesMiner(object):
                 # wikidict = get_entity_dict_from_api(sympt_key)
                 # external_info = wikidict['claims'] if 'claims' in wikidict else ''
                 sympt_info = {'descripción': sympt_name,
-                              'mención':context_mention,
+                              'mención': context_mention,
                               'wikidata': '{}{}'.format(self.wikidata_url, sympt_key)}
 
                 if not sympt_key in self.clues['síntomas']:
@@ -83,7 +84,7 @@ class MedNotesMiner(object):
             for morbid_mention in re.finditer(regex, self.lower_text):
                 context_mention = '...'+(morbid_mention.groups()[0]).replace('\n', ' ')+'...'
                 comorbidity_info = {'descripción': comorbidity_name,
-                                    'mención':context_mention,
+                                    'mención': context_mention,
                                     'wikidata': '{}{}'.format(self.wikidata_url, comorbidity_key)}
 
                 if not comorbidity_key in self.clues['comorbilidades']:
