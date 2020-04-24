@@ -8,11 +8,13 @@
 
 import sys
 import os
+
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
 from tmining.utils import (covid19, covid19_symptoms, covid19_sampling, 
                            covid19_comorbidities, explore_dir, HOME,
                            canonical_symptoms_name, canonical_symptoms_order)
+
 import re
 import simplejson as json
 
@@ -117,25 +119,24 @@ class CovidJsonParser(object):
         self.symptoms = canonical_symptoms_name
         self.symptcols_order = canonical_symptoms_order
 
-    def JSON_to_csv(self, medical_register, sep=','):
-        """Format JSON to csv row of binary presence/absence symptoms row"""
+    def symptoms_occurrences(self, medical_register):
+        """A binary presence/absence symptoms list"""
 
-        # list presence/abscence of symptoms
-        presence_or_absence = [str((code in medical_register['síntomas']))
-                                for code in self.symptcols_order]
-        presence_or_absence_str = sep.join(presence_or_absence)
-        return presence_or_absence_str
+        # depending on the object will open a file or not
+        if isinstance(medical_register, dict):
+            json_register = medical_register
+        elif os.path.exists(medical_register):
+            with open(medical_register) as fp:
+                json_register = json.load(fp, encoding='utf-8')
+        else:
+            print(medical_register, 'KO')
+            json_register = None
 
-    def JSONfile_to_csv(self, MedNote_file, sep=','):
-        """Format JSON to csv row of binary presence/absence symptoms row"""
+        presence_absence = [(self.symptoms[code], (code in json_register['síntomas']))
+                            for code in self.symptcols_order]
+        return presence_absence
 
-        # read file and load json with symptoms
-        with open(MedNote_file) as fp:
-            medical_register = json.load(fp, encoding='utf-8')
-        presence_or_absence = self.JSON_to_csv(medical_register)
-        return presence_or_absence
-
-    def dir_to_csv(self, jsons_inputdir, sep=',', csvtable_outputdir="./"):
+    def dir_to_csv(self, jsons_inputdir, sep=','):
         """Read a set of JSON by MedNotesMiner to form a symptoms table"""
 
         # header could be codes or names
@@ -147,13 +148,13 @@ class CovidJsonParser(object):
         for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
             id_note = MedNote_bname.split('.')[0].split('_')[1]
             try:
-                #presence_absence_dic = self.as_csv_row(MedNote_path)
-                presence_absence = self.JSONfile_to_csv(MedNote_path)
+                presence_absence = [str(presence) for (sympt, presence) in self.symptoms_occurrences(MedNote_path)]
             except Exception as e:
                 # This is because it may fail with some bad formated jsons.
                 print(MedNote_path,'KO')
                 # TODO continue in productions, sometimes a problem from OCR could arise
-            row = id_note+sep+date+sep+presence_absence
+            presence_absence_str = sep.join(presence_absence)
+            row = id_note+sep+date+sep+presence_absence_str
             table += row+'\n'
         return table
 

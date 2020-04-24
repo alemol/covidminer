@@ -7,7 +7,7 @@
 # Copyright (c) 2020 Alejandro Molina Villegas
 
 
-from tmining.covid import MedNotesMiner
+from tmining.covid import MedNotesMiner, CovidJsonParser
 import simplejson as json
 
 
@@ -115,4 +115,7 @@ covid_seeker.check_comorbidities()
 
 covid_insights =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
 print(covid_insights)
+
+parser = CovidJsonParser()
+print(parser.symptoms_occurrences(covid_seeker.clues))
 
