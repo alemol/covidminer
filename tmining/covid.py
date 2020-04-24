@@ -8,7 +8,8 @@
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
-from tmining.utils import covid19, covid19_symptoms, covid19_sampling, covid19_comorbidities, explore_dir
+from tmining.utils import (covid19, covid19_symptoms, covid19_sampling, 
+                           covid19_comorbidities, explore_dir,HOME)
 import re
 import simplejson as json
 
@@ -155,10 +156,9 @@ class CovidJsonParser(object):
             id_note = MedNote_bname.split('.')[0].split('_')[1]
             try:
                 presence_absence_dic = self.as_csv_row(MedNote_path)
-                print(id_note,'OK')
             except Exception as e:
                 # This is because it may fail with some bad formated jsons.
-                print(id_note,'KO')
+                print(MedNote_path,'KO')
                 continue
 
             row = id_note+sep+date+sep+sep.join([presence_absence_dic[code]
@@ -169,9 +169,11 @@ class CovidJsonParser(object):
 
 if __name__ == '__main__':
 
-    nota = "/Users/amolina/repo/covidminer/data/corte_SEDESA_22_abril_2020/Nota Médica_1587150149101.JSON"
-    corte_dir = "/Users/amolina/repo/covidminer/data/corte_SEDESA_22_abril_2020/"
+    nota = HOME+"/data/corte_SEDESA_22_abril_2020/Nota Médica_1587150149101.JSON"
+    corte_dir = HOME+"/data/corte_SEDESA_22_abril_2020/"
     parser = CovidJsonParser()
-    #parser.as_csv_row(nota)
     csv_symptoms = parser.dir_to_csv(corte_dir)
     print(csv_symptoms)
+    with open(HOME+'/data/coocurrencia_sintomas_corte_SEDESA_22_abril_2020.csv', 'w') as fp:
+        fp.write(csv_symptoms)
+
