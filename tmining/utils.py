@@ -24,6 +24,26 @@ UPLOAD_DIRNAME = 'uploads'
 LOG_DIRNAME = 'log'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
 
+# These are the symptoms to report and their canonical names
+canonical_symptoms_name = {
+    'Q38933': 'fiebre',
+    'Q35805': 'tos',
+    'Q767485': 'fallo_respiratorio',
+    'Q344873': 'sdra',
+    'Q188008': 'disnea',
+    'Q86': 'cefalea',
+    'Q9690': 'cansancio',
+    'Q40878': 'diarrea',
+    'Q114085': 'congestión_nasal',
+    'Q474959': 'mialgia',
+    'Q647099': 'hemoptisis',
+    'Q485831': 'linfopenia',
+    'Q5445': 'anemia',
+    'Q1076369': 'tormenta_de_citocinas',
+    'Q3508755': 'síndrome_gripal'
+}
+
+canonical_symptoms_order = ['Q38933','Q35805', 'Q767485','Q344873', 'Q188008', 'Q86','Q9690','Q40878','Q114085','Q474959','Q647099','Q485831','Q5445','Q1076369','Q3508755']
 
 def covid19():
     symptoms_path = join(HOME, COVID19_DATA)

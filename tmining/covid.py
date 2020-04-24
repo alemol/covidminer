@@ -5,11 +5,14 @@
 # 
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
+
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
+
 from tmining.utils import (covid19, covid19_symptoms, covid19_sampling, 
-                           covid19_comorbidities, explore_dir,HOME)
+                           covid19_comorbidities, explore_dir, HOME,
+                           canonical_symptoms_name, canonical_symptoms_order)
 import re
 import simplejson as json
 
@@ -111,22 +114,8 @@ class CovidJsonParser(object):
     def __init__(self):
         # TODO: add 'fecha' as second column and all symptoms
         super(CovidJsonParser, self).__init__()
-        self.canonical_symptnames = {'Q38933': 'fiebre',
-                                     'Q35805': 'tos',
-                                     'Q767485': 'insuficiencia_respiratoria',
-                                     'Q344873': 'síndrome_de_dificultad_respiratoria_aguda',
-                                     'Q188008': 'dificultad_respiratoria',
-                                     'Q86': 'dolor_de_cabeza',
-                                     'Q9690': 'cansancio',
-                                     'Q40878': 'diarrea',
-                                     'Q114085': 'congestión_nasal',
-                                     'Q474959': 'mialgia',
-                                     'Q647099': 'hemoptisis',
-                                     'Q485831': 'linfopenia',
-                                     'Q5445': 'anemia',
-                                     'Q1076369': 'tormenta_de_citocinas',
-                                    'Q3508755': 'infección_respiratoria_aguda'}
-        #self.symptcols = ['Q38933','Q35805', 'Q767485','Q344873', 'Q188008', 'Q86','Q9690','Q40878','Q114085','Q474959','Q647099','Q485831','Q5445','Q1076369','Q3508755']
+        self.symptoms = canonical_symptoms_name
+        self.symptcols_order = canonical_symptoms_order
 
     def as_csv_row(self, MedNote_file):
         """Format JSON by MedNotesMiner to csv row of symptoms"""
@@ -138,17 +127,16 @@ class CovidJsonParser(object):
 
         # list presence/abscence of symptoms
         presence_or_absence = {code: str((code in medical_register['síntomas']))
-                               for code, symptom in self.canonical_symptnames.items()}
+                               for code, symptom in self.symptoms.items()}
         #print(presence_or_absence)
         return presence_or_absence
 
     def dir_to_csv(self, jsons_inputdir, sep=',', csvtable_outputdir="./"):
         """Read a set of JSON by MedNotesMiner to form a symptoms table"""
-        symptcols_order = ['Q38933','Q35805', 'Q767485','Q344873', 'Q188008', 'Q86','Q9690','Q40878','Q114085','Q474959','Q647099','Q485831','Q5445','Q1076369','Q3508755']
-        # header could be codes
-        header = sep.join(['nota','fecha'])+sep+(sep.join([code for code in symptcols_order]))
-        # or names
-        # header = sep.join(['nota','fecha'])+sep+(sep.join([self.canonical_symptnames[c] for c in symptcols_order]))
+
+        # header could be codes or names
+        # header = sep.join(['nota','fecha'])+sep+(sep.join([code for code in self.symptcols_order]))
+        header = sep.join(['nota','fecha'])+sep+(sep.join([self.symptoms[c] for c in self.symptcols_order]))
         table = header+'\n'
         date = '22/04/2020'
         # walk inputdir to get the csv rows
@@ -162,7 +150,7 @@ class CovidJsonParser(object):
                 continue
 
             row = id_note+sep+date+sep+sep.join([presence_absence_dic[code]
-                                               for code in symptcols_order])
+                                               for code in self.symptcols_order])
             table += row+'\n'
         return table
 
