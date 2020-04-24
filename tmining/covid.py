@@ -117,18 +117,22 @@ class CovidJsonParser(object):
         self.symptoms = canonical_symptoms_name
         self.symptcols_order = canonical_symptoms_order
 
-    def as_csv_row(self, MedNote_file):
-        """Format JSON by MedNotesMiner to csv row of symptoms"""
+    def JSON_to_csv(self, medical_register, sep=','):
+        """Format JSON to csv row of binary presence/absence symptoms row"""
+
+        # list presence/abscence of symptoms
+        presence_or_absence = [str((code in medical_register['síntomas']))
+                                for code in self.symptcols_order]
+        presence_or_absence_str = sep.join(presence_or_absence)
+        return presence_or_absence_str
+
+    def JSONfile_to_csv(self, MedNote_file, sep=','):
+        """Format JSON to csv row of binary presence/absence symptoms row"""
 
         # read file and load json with symptoms
         with open(MedNote_file) as fp:
-            medical_register = json.load(fp, encoding='utf-8')        
-        #print(json.dumps(medical_register, ensure_ascii=False, encoding='utf-8', indent=2))
-
-        # list presence/abscence of symptoms
-        presence_or_absence = {code: str((code in medical_register['síntomas']))
-                               for code, symptom in self.symptoms.items()}
-        #print(presence_or_absence)
+            medical_register = json.load(fp, encoding='utf-8')
+        presence_or_absence = self.JSON_to_csv(medical_register)
         return presence_or_absence
 
     def dir_to_csv(self, jsons_inputdir, sep=',', csvtable_outputdir="./"):
@@ -143,14 +147,13 @@ class CovidJsonParser(object):
         for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
             id_note = MedNote_bname.split('.')[0].split('_')[1]
             try:
-                presence_absence_dic = self.as_csv_row(MedNote_path)
+                #presence_absence_dic = self.as_csv_row(MedNote_path)
+                presence_absence = self.JSONfile_to_csv(MedNote_path)
             except Exception as e:
                 # This is because it may fail with some bad formated jsons.
                 print(MedNote_path,'KO')
-                continue
-
-            row = id_note+sep+date+sep+sep.join([presence_absence_dic[code]
-                                               for code in self.symptcols_order])
+                # TODO continue in productions, sometimes a problem from OCR could arise
+            row = id_note+sep+date+sep+presence_absence
             table += row+'\n'
         return table
 
