@@ -20,8 +20,10 @@ COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_COMORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
 COVID19_SAMPLING = 'resources/muestras.txt'
+PLOTS_DIR = 'plots'
 UPLOAD_DIRNAME = 'uploads'
 LOG_DIRNAME = 'log'
+
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
 
 # These are the symptoms to report and their canonical names
