@@ -8,6 +8,7 @@
 
 
 from tmining.covid import MedNotesMiner, CovidJsonParser
+from tmining.report import PlotGenerator
 import simplejson as json
 
 
@@ -119,3 +120,7 @@ print(covid_insights)
 parser = CovidJsonParser()
 print(parser.symptoms_occurrences(covid_seeker.clues))
 
+# cooccurrences plot from data table obtained from symptoms_occurrences
+plot_gen = PlotGenerator()
+csv_path = 'data/cooccurrences_of_symptoms.csv'
+plot_gen.cooccurrences(csv_path)

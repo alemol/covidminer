@@ -108,6 +108,6 @@ class PlotGenerator(object):
 
 
 if __name__ == '__main__':
-    csv_path = HOME+'/data/coocurrencia_sintomas_corte_SEDESA_22_abril_2020.csv'
+    csv_path = HOME+'/data/cooccurrences_of_symptoms.csv'
     plot_gen = PlotGenerator()
     plot_gen.cooccurrences(csv_path)
