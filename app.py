@@ -6,9 +6,9 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
-from tmining.covid import MedNotesMiner
-from tmining.ocr import TesseOCR
-from tmining.utils import uploads_dir, allowed_file, log_file
+from c19mining.covid import MedNotesMiner
+from c19mining.ocr import TesseOCR
+from c19mining.utils import uploads_dir, allowed_file, log_file
 
 import os
 import logging

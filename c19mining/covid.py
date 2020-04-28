@@ -11,7 +11,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
-from tmining.utils import (covid19, covid19_symptoms, covid19_sampling, 
+from c19mining.utils import (covid19, covid19_symptoms, covid19_sampling, 
                            covid19_comorbidities, explore_dir, HOME,
                            canonical_symptoms_name, canonical_symptoms_order)
 

@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
-from tmining.utils import HOME, PLOTS_DIR, canonical_symptoms_name, canonical_symptoms_order
+from c19mining.utils import HOME, PLOTS_DIR, canonical_symptoms_name, canonical_symptoms_order
 
 import numpy as np
 import pandas as pd
