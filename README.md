@@ -6,7 +6,7 @@ The script `demo.py` is the minimal code example in Python 3.
 
 
 ```
-from tmining.covid import MedNotesMiner, CovidJsonParser
+from c19mining.covid import MedNotesMiner, CovidJsonParser
 import simplejson as json
 
 texto_urgencia = "Paciente masculino de 52 ..." # very long text
@@ -160,7 +160,7 @@ Gives:
 From the above data structure its possible to get counts and tables for symptoms and comorbidities.
 
 ```
-from tmining.report import PlotGenerator
+from c19mining.report import PlotGenerator
 
 plot_gen = PlotGenerator()
 csv_path = 'data/cooccurrences_of_symptoms.csv'

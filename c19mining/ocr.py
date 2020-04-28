@@ -8,7 +8,7 @@
 
 import os
 from os.path import (join, splitext, exists)
-from tmining.utils import (mkdir, explore_dir)
+from c19mining.utils import (mkdir, explore_dir)
 import pdf2image
 try:
     from PIL import Image
