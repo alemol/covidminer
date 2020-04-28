@@ -161,7 +161,7 @@ Gives:
 When text extraction from PDF files without selectable text (or, even worst from images) is needed you must apply the OCR class included before mining the information.
 
 
-![notamed without selectable text](data/notamed.pdf)
+![notamed without selectable text](data/notamed.jpg)
 
 
 ```
