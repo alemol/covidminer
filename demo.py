@@ -6,9 +6,10 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
-
+from c19mining.ocr import TesseOCR
 from c19mining.covid import MedNotesMiner, CovidJsonParser
 from c19mining.report import PlotGenerator
+
 import simplejson as json
 
 
@@ -108,6 +109,11 @@ EGO_BAC, ESCASAS, x campo, 0/64,
 EN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.
 '''
 
+# When text extraction is needed you must apply the OCR class before mining the information.
+# my_ocr = TesseOCR('spa')
+# texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
+
+# Information Extraction
 covid_seeker = MedNotesMiner(texto_urgencia)
 covid_seeker.check_covid19()
 covid_seeker.check_symptoms()

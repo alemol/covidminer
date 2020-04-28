@@ -157,7 +157,23 @@ Gives:
 }
 ```
 
-From the above data structure its possible to get counts and tables for symptoms and comorbidities.
+
+When text extraction from PDF files without selectable text (or, even worst from images) is needed you must apply the OCR class included before mining the information.
+
+
+![notamed without selectable text](data/notamed.pdf)
+
+
+```
+from c19mining.ocr import TesseOCR
+
+my_ocr = TesseOCR('spa')
+texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
+
+```
+
+Anyway, from the extracted data its possible to get counts and tables for symptoms and comorbidities. And finally make reports and visualizations.
+
 
 ```
 from c19mining.report import PlotGenerator
@@ -172,35 +188,13 @@ Take a look
 ![cooccurrences_plot](plots/cooccurrences_plot.jpg)
 
 
-## As a Lightweight Web service
-
-Functionality can be also used through lightweight web services implemented with Flask. However, the use of a professional Web Server Gateway Interface for professional applications is recommended.
-
-Having installed and configured what is necessary (see Dependencies section and docs/devnotes), you can run the server with the following command:
-
-
-```
-$python app.py
-
- * Serving Flask app "app" (lazy loading)
- * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
-   Use a production WSGI server instead.
- * Debug mode: off
-INFO:  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
-```
-
-Then, with the server running you can now make POST requests sending PDF files.
-
-![HTTP POST request example](docs/post.png)
-
 
 ## Dependencies
 
 For Python 3 dependencies see `requirements.txt`. A quick installation with pip is recommended.
 
 ```
-pip install  -r requirements.txt
+pip install  -r docs/requirements.txt
 ```
 
 In addition to the Python 3 libraries it is required to install [tesseract](https://github.com/tesseract-ocr/tesseract/wiki) and [Poppler](https://poppler.freedesktop.org/) for OCR support.
@@ -222,6 +216,29 @@ sudo add-apt-repository -y ppa:cran/poppler
 sudo apt-get update
 sudo apt-get install -y libpoppler-cpp-dev
 ```
+
+## Running as a Lightweight Web service
+
+Functionality can be also used through lightweight web services implemented with Flask. However, the use of a professional Web Server Gateway Interface for professional applications is recommended.
+
+Having installed and configured what is necessary (see Dependencies section and docs/devnotes), you can run the server with the following command:
+
+
+```
+$python app.py
+
+ * Serving Flask app "app" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+INFO:  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
+```
+
+Then, with the server running you can now make POST requests sending PDF files.
+
+![HTTP POST request example](docs/post.png)
+
 
 ## Built With
 
