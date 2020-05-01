@@ -11,13 +11,35 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
-from c19mining.utils import (covid19, covid19_symptoms, covid19_sampling, 
-                           covid19_comorbidities, explore_dir, HOME,
-                           canonical_symptoms_name, canonical_symptoms_order)
+from c19mining.textprocessing import Tokenizer
+from c19mining.utils import (HOME, covid19, covid19_symptoms, covid19_sampling, 
+                             covid19_comorbidities, explore_dir,
+                             canonical_symptoms_name, canonical_symptoms_order,
+                             covid19_symptoms_regex)
 
 import re
 import simplejson as json
 
+
+class CovidTagger(object):
+    """Regex based Tagger with COVID-19, diseases and symptoms"""
+    def __init__(self, covid19_db=None, symptoms_db=None, morbidities_db=None):
+        super(CovidTagger, self).__init__()
+        self.tokenizer = Tokenizer()
+        #self.covid19_re = covid19_regex()
+        self.symptoms_re = covid19_symptoms_regex()
+        #self.morbidities_re = covid19_comorbidities_regex()
+
+    def tag_symptoms(self, text_utf8, split_sents=False):
+        """labelize symptoms ocurrences"""        
+        if split_sents:
+            sentence_splitted = self.tokenizer.split_sentences(text_utf8)
+            tokenized = self.tokenizer.split_tokens(sentence_splitted)
+        else:
+            tokenized = self.tokenizer.split_tokens(text_utf8)
+        # replace symptoms mentions with labeled mentions
+        labeled = self.symptoms_re.sub('<START:symptom> HERE <END>', tokenized)
+        return labeled
 
 class MedNotesMiner(object):
     """Medical notes data miner for Covid-19 insights"""
@@ -161,11 +183,24 @@ class CovidJsonParser(object):
 
 if __name__ == '__main__':
 
-    nota = HOME+"/data/corte_SEDESA_22_abril_2020/Nota Médica_1587150149101.JSON"
-    corte_dir = HOME+"/data/corte_SEDESA_22_abril_2020/"
-    parser = CovidJsonParser()
-    csv_symptoms = parser.dir_to_csv(corte_dir)
-    print(csv_symptoms)
-    with open(HOME+'/data/coocurrencia_sintomas_corte_SEDESA_22_abril_2020.csv', 'w') as fp:
-        fp.write(csv_symptoms)
+    # corte_dir = HOME+"/data/corte_SEDESA_22_abril_2020/"
+    # parser = CovidJsonParser()
+    # csv_symptoms = parser.dir_to_csv(corte_dir)
+    # print(csv_symptoms)
+    s = '''Durante los paroxismos de tos estos pacientes se tornan muy cianóticos y llegan incluso a quedar inconscientes .
+La tos de otros distintos tipos puede estar producida por la estimulación de terminaciones nerviosas situadas en la mucosa bronquial .
+La tos de la bronquitis aguda presenta características similares a la de la traqueítis , pero a menudo está precedida o acompañada por estertores transitorios y por una sensación de opresión difusa en el pecho .
+En los primeros momentos es seca ; fiando posteriormente se hace productiva , se transforma a la vez en suelta e indolora .
+La tos de la bronquitis crónica tiende a presentarse en paroxismos prolongados , que culminan casi siempre con la producción de esputo .
+Sin embargo , cuando éste es muy espeso o existe una alteración importante de la función ventilatoria , el paciente , agotado por los esfuerzos de la tos , puede cesar en sus esfuerzos por eliminar las secreciones bronquiales , y el episodio de tos concluye sin ningún resultado .
+Esta tos inconclusa , como la describen algunos pacientes , es típica de la bronquitis crónica avanzada .
+Los ataques de tos en estos pacientes a menudo producen disnea intensa , frecuentemente acompañada de estertores , y suelen ser muy penosos .
+La tos de la bronquitis crónica presenta otras características típicas ; es más frecuente e intensa cuando el paciente se acuesta , y aún más cuando se levanta por la mañana , debido los cambios bruscos de posición y a las variaciones en la temperatura del aire inspirado las que está expuesto en esos momentos .
+Raramente se ve interrumpido el sueño por la tos , pero la mayoría de los pacientes con bronquitis crónica se despiertan por la mañana con un ligero estertor y una sensación de opresión en el pecho , síntomas que no mejoran hasta que no se produce la expectoración mediante un violento taque de tos que puede prolongarse durante varios minutos .
+La tos de la bronquitis crónica se ve estimulada , además de por los cambios en la temperatura atmosférica , por irritantes bronquiales como el humo del tabaco , gases o polvo , y por el incremento súbito en la profundidad de las respiraciones producido por el ejercicio y por la risa .
+Algunos pacientes pueden sufrir un síncope por tos ( página 38 ) durante las crisis de tos prolongada y violenta .'''
 
+    tagger = CovidTagger()
+    tagged_s = tagger.tag_symptoms(s)
+    print(s)
+    print(tagged_s)

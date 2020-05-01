@@ -55,6 +55,11 @@ def covid19_symptoms():
     symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)
     return load_csv(symptoms_path)
 
+def covid19_symptoms_regex():
+    symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)
+    regex = csv2regex(symptoms_path)
+    return regex
+
 def covid19_comorbidities():
     comorbidities_path = join(HOME, COVID19_COMORBIDITIES_DATA)
     return load_csv(comorbidities_path)
@@ -77,6 +82,11 @@ def mkdir(out, name):
     if not exists(create_dir):
         os.makedirs(create_dir)
     return create_dir
+
+def csv2regex(path):
+    tuple_list = load_csv(path)
+    regex ='|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list])
+    return re.compile(regex)
 
 def explore_dir(explore_dir, yield_extension='txt'):
     for root, directory, files in os.walk(explore_dir, topdown=True):
