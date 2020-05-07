@@ -20,6 +20,9 @@ COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_COMORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
 COVID19_SAMPLING = 'resources/muestras.txt'
+WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
+WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
+COVID_DESEASE_DATA = 'resources/enf.csv'
 PLOTS_DIR = 'plots'
 UPLOAD_DIRNAME = 'uploads'
 LOG_DIRNAME = 'log'
@@ -55,9 +58,32 @@ def covid19_symptoms():
     symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)
     return load_csv(symptoms_path)
 
+def wiki_symptoms():
+    symptoms_path = join(HOME, WIKI_SYMPTOMS_DATA)
+    return load_csv(symptoms_path)
+
+def wiki_deseases():
+    symptoms_path = join(HOME, WIKI_DESEASES_DATA)
+    return load_csv(symptoms_path)
+
 def covid19_symptoms_regex():
     symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)
     regex = csv2regex(symptoms_path)
+    return regex
+
+def wiki_symptoms_regex():
+    symptoms_path = join(HOME, WIKI_SYMPTOMS_DATA)
+    regex = csv2regex(symptoms_path)
+    return regex
+
+def covid_deseases_regex():
+    data_path = join(HOME, COVID_DESEASE_DATA)
+    regex = csv2regex(data_path)
+    return regex
+
+def wiki_deseases_regex():
+    data_path = join(HOME, WIKI_DESEASES_DATA)
+    regex = csv2regex(data_path)
     return regex
 
 def covid19_comorbidities():
@@ -84,8 +110,8 @@ def mkdir(out, name):
     return create_dir
 
 def csv2regex(path):
-    tuple_list = load_csv(path)
-    regex ='|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list])
+    tuple_list = load_csv(path)    
+    regex =r'(?P<matched>'+('|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list]))+')'
     return re.compile(regex)
 
 def explore_dir(explore_dir, yield_extension='txt'):

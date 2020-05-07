@@ -8,38 +8,19 @@
 
 import sys
 import os
-
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
 from c19mining.textprocessing import Tokenizer
-from c19mining.utils import (HOME, covid19, covid19_symptoms, covid19_sampling, 
-                             covid19_comorbidities, explore_dir,
-                             canonical_symptoms_name, canonical_symptoms_order,
-                             covid19_symptoms_regex)
+from c19mining.utils import (HOME, explore_dir,
+                             covid19, covid19_symptoms,
+                             wiki_symptoms, wiki_deseases,
+                             covid19_sampling, covid19_comorbidities,
+                             wiki_deseases_regex, wiki_symptoms_regex,
+                             canonical_symptoms_name, canonical_symptoms_order)
 
 import re
 import simplejson as json
 
-
-class CovidTagger(object):
-    """Regex based Tagger with COVID-19, diseases and symptoms"""
-    def __init__(self, covid19_db=None, symptoms_db=None, morbidities_db=None):
-        super(CovidTagger, self).__init__()
-        self.tokenizer = Tokenizer()
-        #self.covid19_re = covid19_regex()
-        self.symptoms_re = covid19_symptoms_regex()
-        #self.morbidities_re = covid19_comorbidities_regex()
-
-    def tag_symptoms(self, text_utf8, split_sents=False):
-        """labelize symptoms ocurrences"""        
-        if split_sents:
-            sentence_splitted = self.tokenizer.split_sentences(text_utf8)
-            tokenized = self.tokenizer.split_tokens(sentence_splitted)
-        else:
-            tokenized = self.tokenizer.split_tokens(text_utf8)
-        # replace symptoms mentions with labeled mentions
-        labeled = self.symptoms_re.sub('<START:symptom> HERE <END>', tokenized)
-        return labeled
 
 class MedNotesMiner(object):
     """Medical notes data miner for Covid-19 insights"""
@@ -52,7 +33,8 @@ class MedNotesMiner(object):
         if not covid19_db:
             self.covid19_db = covid19()
         if not symptoms_db:
-            self.symptoms_db = covid19_symptoms()
+            #self.symptoms_db = covid19_symptoms()
+            self.symptoms_db = wiki_symptoms()
         if not sampling_db:
             self.sampling_db = covid19_sampling()
         if not morbidities_db:
@@ -181,6 +163,41 @@ class CovidJsonParser(object):
         return table
 
 
+class OpenNLPTagger(object):
+    """OpenNLP Tagger for diseases and symptoms based on long lists"""
+    def __init__(self):
+        super(OpenNLPTagger, self).__init__()
+        self.symptoms_re = wiki_symptoms_regex()
+        self.deseases_re = wiki_deseases_regex()
+        self.tokenizer = Tokenizer()
+
+    def tagbyreg(self, text, split_sents=False):
+        """labelize symptoms and deseases ocurrences"""
+        # depending on the object will open a file or not
+        if isinstance(text, str):
+            lower_text = text.lower()
+        elif os.path.exists(text):
+            with open(text, 'r', encoding='utf-8') as fp:
+                lower_text = text.lower()
+        else:
+            print(text, 'KO')
+            lower_text = None
+        # prepare lines and tokens
+        if split_sents:
+            sentence_splitted = self.tokenizer.split_sentences(lower_text)
+            tokenized = self.tokenizer.split_tokens(sentence_splitted)
+        else:
+            tokenized = self.tokenizer.split_tokens(lower_text)
+        #  seek for symptoms and deaseses and tagg them
+        labeled = self.deseases_re.sub(r'<START:Desease> \g<matched> <END>', tokenized)
+        labeled = self.symptoms_re.sub(r'<START:Symptom> \g<matched> <END>', labeled)
+        # correct nasty nested tags if produced
+        nested =r'(?P<a><START:(Symptom|Desease)> (\w+ )*)<START:(Symptom|Desease)>(?P<b> (\w+ )+)<END>(?P<c> (\w+ )*<END>)'
+        corrected_labeled = re.sub(nested, r'\g<a>\g<b>\g<c>', labeled)
+        labeled_text = corrected_labeled.replace('  ',' ')
+        return(labeled_text)
+
+
 if __name__ == '__main__':
 
     # corte_dir = HOME+"/data/corte_SEDESA_22_abril_2020/"
@@ -196,11 +213,11 @@ Sin embargo , cuando éste es muy espeso o existe una alteración importante de 
 Esta tos inconclusa , como la describen algunos pacientes , es típica de la bronquitis crónica avanzada .
 Los ataques de tos en estos pacientes a menudo producen disnea intensa , frecuentemente acompañada de estertores , y suelen ser muy penosos .
 La tos de la bronquitis crónica presenta otras características típicas ; es más frecuente e intensa cuando el paciente se acuesta , y aún más cuando se levanta por la mañana , debido los cambios bruscos de posición y a las variaciones en la temperatura del aire inspirado las que está expuesto en esos momentos .
-Raramente se ve interrumpido el sueño por la tos , pero la mayoría de los pacientes con bronquitis crónica se despiertan por la mañana con un ligero estertor y una sensación de opresión en el pecho , síntomas que no mejoran hasta que no se produce la expectoración mediante un violento taque de tos que puede prolongarse durante varios minutos .
+Raramente se ve interrumpido el sueño por alguna tos muy rara , pero la mayoría de los pacientes con bronquitis crónica se despiertan por la mañana con un ligero estertor y una sensación de opresión en el pecho , síntomas que no mejoran hasta que no se produce la expectoración mediante un violento taque de tos que puede prolongarse durante varios minutos .
 La tos de la bronquitis crónica se ve estimulada , además de por los cambios en la temperatura atmosférica , por irritantes bronquiales como el humo del tabaco , gases o polvo , y por el incremento súbito en la profundidad de las respiraciones producido por el ejercicio y por la risa .
 Algunos pacientes pueden sufrir un síncope por tos ( página 38 ) durante las crisis de tos prolongada y violenta .'''
 
-    tagger = CovidTagger()
-    tagged_s = tagger.tag_symptoms(s)
-    print(s)
-    print(tagged_s)
+    tagger = OpenNLPTagger()
+    tagged = tagger.tagbyreg(s)
+    print(tagged)
+

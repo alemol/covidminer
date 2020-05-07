@@ -59,3 +59,70 @@ amolina@Mac:~/repo/covidminer$curl -X POST -F file="@data/notamed.pdf" http://lo
 se debe tener un directorio de uploads a donde van a cargarse los pdfs (cuidado con saturarlo) y un directorio log que está destinado a supervisar el servidor.
 
 
+---
+
+
+
+OpenNLP 1.9.2. 
+amolina@Mac:~/repo/covidminer/mldata$cat minitrain.txt | wc -l
+   58698
+
+Algunos problemas
+
+La carencia de factor intrínseco en la secreción gástrica ocasiona <START:Desease> anemia perniciosa <END> , acompañada en ocasiones de molestias abdominales vagas y episodios recurrentes de <START:Desease> diarrea <END> .
+La carencia de factor intrínseco en la secreción gástrica ocasiona <START:Desease> anemia perniciosa <END>. acompañada en ocasiones de molestias abdominales vagas y episodios recurrentes de <START:Desease> diarrea <END> .
+
+
+replace 
+-<START:Desease>
+- <START:Desease>
+
+
+Un tipo frecuente de <START:Desease> neumonía <END> es la <START:Desease> <START:Desease> neumonía <END> bacteriana <END> , originada más frecuentemente por neumococos .
+Cuando una neurona motora se pone enferma , como sucede en la <START:Desease> <START:Desease> atrofia muscular <END> progresiva <END> , puede manifestar una irritabilidad aumentada y todas las fibras musculares que ella controla pueden descargarse de manera esporádica , aisladamente y con independencia de otras unidades .
+Por desgracia , los músculos proximales están ocasionalmente implicados en la <START:Desease> <START:Desease> atrofia muscular <END> espinal <END> progresiva , como en el síndrome descrito por primera vez por Wohlfart y otros , y por Kugelberg @ - @ Welander , lo que contribuye a hacer más confuso el diagnóstico .
+
+--
+
+amolina@Mac:~/repo/covidminer/mldata$opennlp TokenNameFinderTrainer -model es-covidmini.bin -lang es -data minitrain.txt -encoding UTF-8
+Indexing events with TwoPass using cutoff of 0
+
+  Computing event counts...  done. 1622122 events
+  Indexing...  done.
+Collecting events... Done indexing in 77.17 s.
+Incorporating indexed data for training...  
+done.
+  Number of Event Tokens: 1622122
+      Number of Outcomes: 4
+    Number of Predicates: 1587261
+Computing model parameters...
+Performing 300 iterations.
+  1:  . (1618012/1622122) 0.9974662818209727
+  2:  . (1620490/1622122) 0.9989939104457002
+  3:  . (1621177/1622122) 0.9994174297617565
+  4:  . (1621423/1622122) 0.9995690829666326
+  5:  . (1621605/1622122) 0.9996812816791832
+  6:  . (1621758/1622122) 0.9997756025748988
+  7:  . (1621815/1622122) 0.9998107417321261
+  8:  . (1621828/1622122) 0.9998187559258798
+  9:  . (1621853/1622122) 0.9998341678369445
+ 10:  . (1621935/1622122) 0.9998847189052364
+Stopping: change in training set accuracy less than 1.0E-5
+Stats: (1622026/1622122) 0.9999408182615118
+...done.
+
+Training data summary:
+#Sentences: 58350
+#Tokens: 1622122
+#Desease entities: 6427
+#Symptom entities: 248
+
+Writing name finder model ... Compressed 1587261 parameters to 32587
+11 outcome patterns
+done (1.585s)
+
+Wrote name finder model to
+path: /Users/amolina/repo/covidminer/mldata/es-covidmini.bin
+
+Execution time: 124.305 seconds
+

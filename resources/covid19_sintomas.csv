@@ -1,41 +1,41 @@
 id	name
-Q35805	tos
-Q35805	tosigoso
-Q35805	tose
-Q35805	tosegoso
-Q114085	rinitis
-Q114085	congestión nasal
-Q114085	fiebre del heno
-Q114085	congestion nasal
-Q38933	fiebre
-Q767485	insuficiencia respiratoria
-Q767485	fallo respiratorio
-Q86	cefalea
-Q86	dolor de cabeza
-Q474959	mialgia
-Q9690	cansancio
-Q647099	hemoptisis
-Q647099	hemorragia alveolar
-Q40878	diarrea
-Q40878	churrias
-Q188008	disnea
-Q188008	dificultad respiratoria
-Q188008	falta de aliento
-Q188008	fatiga respiratoria
-Q485831	linfopenia
-Q344873	síndrome de dificultad respiratoria aguda
 Q344873	síndrome de distrés respiratorio del adulto
-Q344873	sdra
-Q344873	sindrome de distres respiratorio agudo
-Q344873	sindrome de distres respiratorio del adulto
-Q344873	síndrome de distres respiratorio agudo
-Q344873	sindrome de distrés respiratorio agudo
 Q344873	síndrome de distres respiratorio del adulto
 Q344873	sindrome de distrés respiratorio del adulto
+Q344873	sindrome de distres respiratorio del adulto
+Q344873	síndrome de dificultad respiratoria aguda
+Q344873	síndrome de distres respiratorio agudo
+Q344873	sindrome de distrés respiratorio agudo
+Q344873	sindrome de distres respiratorio agudo
 Q344873	sindrome de dificultad respiratoria
-Q5445	anemia
-Q1076369	tormenta de citocinas
-Q1076369	tormenta de citoquinas
-Q3508755	síndrome gripal
 Q3508755	infección respiratoria aguda
+Q767485	insuficiencia respiratoria
 Q3508755	síndrome pseudo-gripal
+Q188008	dificultad respiratoria
+Q1076369	tormenta de citoquinas
+Q1076369	tormenta de citocinas
+Q647099	hemorragia alveolar
+Q188008	fatiga respiratoria
+Q767485	fallo respiratorio
+Q114085	congestión nasal
+Q3508755	síndrome gripal
+Q114085	congestion nasal
+Q188008	falta de aliento
+Q114085	fiebre del heno
+Q86	dolor de cabeza
+Q647099	hemoptisis
+Q485831	linfopenia
+Q35805	tosigoso
+Q35805	tosegoso
+Q114085	rinitis
+Q474959	mialgia
+Q9690	cansancio
+Q40878	churrias
+Q40878	diarrea
+Q188008	disnea
+Q38933	fiebre
+Q344873	sdra
+Q5445	anemia
+Q35805	tose
+Q86	cefalea
+Q35805	tos
