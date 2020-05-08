@@ -168,6 +168,16 @@ def covid19_decease():
     data_path = join(HOME, COVID19_DECEASE)
     return load_txt(data_path)
 
+def decease_regex():
+    data_path = join(HOME, COVID19_DECEASE)
+    regex = list2contextregex(data_path)
+    return regex
+
+def sampling_regex():
+    data_path = join(HOME, COVID19_SAMPLING)
+    regex = list2contextregex(data_path)
+    return regex
+
 def load_txt(filepath):
     with open(filepath) as f:
         lines = [l.replace('\n', '') for l in f.readlines()]
@@ -187,6 +197,12 @@ def mkdir(out, name):
     if not exists(create_dir):
         os.makedirs(create_dir)
     return create_dir
+
+def list2contextregex(path, context_size=6):
+    with open(path) as f:
+        joined = '|'.join([l.strip('\n') for l in f.readlines()])
+    regex = r'((\w+\W+){0,6}('+joined+r')(\W+\w+){0,6})'
+    return re.compile(regex)
 
 def csv2regex(path):
     tuple_list = load_csv(path)

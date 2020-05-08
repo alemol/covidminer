@@ -12,9 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
 from c19mining.textprocessing import Tokenizer
 from c19mining.utils import (HOME, explore_dir,
-                             covid19, covid19_symptoms,
-                             wiki_symptoms, wiki_deseases,
-                             covid19_sampling, covid19_decease, covid19_comorbidities,
+                             sampling_regex, decease_regex,
                              wiki_deseases_regex, wiki_symptoms_regex,
                              context_covid_regex, covid_namedict,
                              context_morbidities_regex, morbidities_namedict,
@@ -35,8 +33,8 @@ class MedNotesMiner(object):
         self.text = text_utf8
         self.clues = {'texto': self.text}
         self.lower_text = self.text.lower()
-        self.sampling_db = covid19_sampling()
-        self.decease_db = covid19_decease()
+        self.sampling_re = sampling_regex()
+        self.decease_re = decease_regex()
         self.covid_re = context_covid_regex()
         self.covid_dict = covid_namedict()
         self.symptoms_re = context_symptoms_regex()
@@ -106,22 +104,18 @@ class MedNotesMiner(object):
         self.clues['muestreos'] = []
 
         # seek for sampling matches
-        for sampling_cueword in self.sampling_db:
-            regex = r'((\w+\W+){0,5}\b'+sampling_cueword+r'\b(\W+\w+){0,5})'
-            for samp_mention in re.finditer(regex, self.lower_text):
-                context_mention = '...'+(samp_mention.groups()[0]).replace('\n', ' ')+'...'
-                self.clues['muestreos'].append({'mención': context_mention})
+        for sampling_mention in self.sampling_re.finditer(self.lower_text):
+            context_mention = '...'+(sampling_mention.groups()[0]).replace('\n', ' ')+'...'
+            self.clues['muestreos'].append({'mención': context_mention})
 
     def check_decease(self):
         """match decease mentions"""
         self.clues['defunciones'] = []
 
         # seek for decease matches
-        for decease_cueword in self.decease_db:
-            regex = r'((\w+\W+){0,5}\b'+decease_cueword+r'\b(\W+\w+){0,5})'
-            for decease_mention in re.finditer(regex, self.lower_text):
-                context_mention = '...'+(decease_mention.groups()[0]).replace('\n', ' ')+'...'
-                self.clues['defunciones'].append({'mención': context_mention})
+        for decease_mention in self.decease_re.finditer(self.lower_text):
+            context_mention = '...'+(decease_mention.groups()[0]).replace('\n', ' ')+'...'
+            self.clues['defunciones'].append({'mención': context_mention})
 
 
 class CovidJsonParser(object):
@@ -292,6 +286,7 @@ if __name__ == '__main__':
 
     parser.dir_to_dataframe(corte_dir)
 
+# TODO: Move this to module NER
 #     s = '''Durante los paroxismos de tos estos pacientes se tornan muy cianóticos y llegan incluso a quedar inconscientes .
 # La tos de otros distintos tipos puede estar producida por la estimulación de terminaciones nerviosas situadas en la mucosa bronquial .
 # La tos de la bronquitis aguda presenta características similares a la de la traqueítis , pero a menudo está precedida o acompañada por estertores transitorios y por una sensación de opresión difusa en el pecho .
