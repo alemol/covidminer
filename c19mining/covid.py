@@ -14,7 +14,7 @@ from c19mining.textprocessing import Tokenizer
 from c19mining.utils import (HOME, explore_dir,
                              covid19, covid19_symptoms,
                              wiki_symptoms, wiki_deseases,
-                             covid19_sampling, covid19_comorbidities,
+                             covid19_sampling, covid19_decease, covid19_comorbidities,
                              wiki_deseases_regex, wiki_symptoms_regex,
                              context_covid_regex, covid_namedict,
                              context_morbidities_regex, morbidities_namedict,
@@ -29,22 +29,14 @@ import simplejson as json
 
 class MedNotesMiner(object):
     """Medical notes data miner for Covid-19 insights"""
-    def __init__(self, text_utf8, covid19_db=None, symptoms_db=None, sampling_db=None, morbidities_db=None):
+    def __init__(self, text_utf8):
         super(MedNotesMiner, self).__init__()
         self.wikidata_url = 'https://www.wikidata.org/wiki/'
         self.text = text_utf8
         self.clues = {'texto': self.text}
         self.lower_text = self.text.lower()
-        if not covid19_db:
-            self.covid19_db = covid19()
-        if not symptoms_db:
-            self.symptoms_db = wiki_symptoms()
-        if not sampling_db:
-            self.sampling_db = covid19_sampling()
-        if not morbidities_db:
-            self.morbidities_db = covid19_comorbidities()
-        self.deseases_re = context_deseases_regex()
-        self.deseases_dict = deseases_namedict()
+        self.sampling_db = covid19_sampling()
+        self.decease_db = covid19_decease()
         self.covid_re = context_covid_regex()
         self.covid_dict = covid_namedict()
         self.symptoms_re = context_symptoms_regex()
@@ -119,6 +111,17 @@ class MedNotesMiner(object):
             for samp_mention in re.finditer(regex, self.lower_text):
                 context_mention = '...'+(samp_mention.groups()[0]).replace('\n', ' ')+'...'
                 self.clues['muestreos'].append({'mención': context_mention})
+
+    def check_decease(self):
+        """match decease mentions"""
+        self.clues['defunciones'] = []
+
+        # seek for decease matches
+        for decease_cueword in self.decease_db:
+            regex = r'((\w+\W+){0,5}\b'+decease_cueword+r'\b(\W+\w+){0,5})'
+            for decease_mention in re.finditer(regex, self.lower_text):
+                context_mention = '...'+(decease_mention.groups()[0]).replace('\n', ' ')+'...'
+                self.clues['defunciones'].append({'mención': context_mention})
 
 
 class CovidJsonParser(object):

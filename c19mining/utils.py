@@ -20,6 +20,7 @@ COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_MORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
 COVID19_SAMPLING = 'resources/muestras.txt'
+COVID19_DECEASE = 'resources/decesos.txt'
 WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
 WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
 COVID_DESEASE_DATA = 'resources/enf.csv'
@@ -160,8 +161,12 @@ def covid19_comorbidities():
     return load_csv(comorbidities_path)
 
 def covid19_sampling():
-    sampling_path = join(HOME, COVID19_SAMPLING)
-    return load_txt(sampling_path)
+    data_path = join(HOME, COVID19_SAMPLING)
+    return load_txt(data_path)
+
+def covid19_decease():
+    data_path = join(HOME, COVID19_DECEASE)
+    return load_txt(data_path)
 
 def load_txt(filepath):
     with open(filepath) as f:

@@ -13,3 +13,14 @@ muestrearé
 muestrearás
 muestreará
 muestrearemos
+prueba
+pruebas
+probar
+probamos
+prueban
+probaré
+probarás
+probará
+probaremos
+test
+tests
