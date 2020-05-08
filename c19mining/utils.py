@@ -115,6 +115,16 @@ def wiki_deseases_regex():
     regex = csv2regex(data_path)
     return regex
 
+def context_deseases_regex():
+    data_path = join(HOME, WIKI_DESEASES_DATA)
+    regex = csv2contextregex(data_path)
+    return regex
+
+def deseases_namedict():
+    data_path = join(HOME, WIKI_DESEASES_DATA)
+    namedict = load_names_dict(data_path)
+    return namedict
+
 def covid19_comorbidities():
     comorbidities_path = join(HOME, COVID19_COMORBIDITIES_DATA)
     return load_csv(comorbidities_path)
@@ -132,6 +142,11 @@ def load_csv(filepath):
     df = pd.read_csv(filepath, sep='\t')
     return list(zip(df.id, df.name))
 
+def load_names_dict(filepath):
+    df = pd.read_csv(filepath, sep='\t')
+    d = dict({name:code for name, code in list(zip(df.name, df.id))})
+    return d
+
 def mkdir(out, name):
     create_dir = join(out, name)
     if not exists(create_dir):
@@ -139,8 +154,14 @@ def mkdir(out, name):
     return create_dir
 
 def csv2regex(path):
-    tuple_list = load_csv(path)    
-    regex =r'(?P<matched>'+('|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list]))+')'
+    tuple_list = load_csv(path)
+    regex = r'(?P<matched>'+('|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list]))+')'
+    return re.compile(regex)
+
+def csv2contextregex(path, context_size=6):
+    tuple_list = load_csv(path)
+    joined = '|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list])
+    regex = r'((\w+\W+){0,6}('+joined+r')(\W+\w+){0,6})'
     return re.compile(regex)
 
 def explore_dir(explore_dir, yield_extension='txt'):

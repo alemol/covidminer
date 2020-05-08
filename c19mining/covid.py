@@ -16,6 +16,7 @@ from c19mining.utils import (HOME, explore_dir,
                              wiki_symptoms, wiki_deseases,
                              covid19_sampling, covid19_comorbidities,
                              wiki_deseases_regex, wiki_symptoms_regex,
+                             context_deseases_regex, deseases_namedict,
                              canonical_symptoms_name, canonical_comorb_names,
                              canonical_symptoms_order)
 import re
@@ -34,12 +35,14 @@ class MedNotesMiner(object):
         if not covid19_db:
             self.covid19_db = covid19()
         if not symptoms_db:
-            #self.symptoms_db = covid19_symptoms()
             self.symptoms_db = wiki_symptoms()
         if not sampling_db:
             self.sampling_db = covid19_sampling()
         if not morbidities_db:
             self.morbidities_db = covid19_comorbidities()
+        self.symptoms_re = wiki_symptoms_regex()
+        self.deseases_re = context_deseases_regex()
+        self.deseases_dict = deseases_namedict()
 
     def check_covid19(self, lower_case=True):
         """match covid-19 mentions"""
@@ -89,20 +92,19 @@ class MedNotesMiner(object):
         self.clues['comorbilidades'] = {}
 
         # seek for comorbidities matches
-        for (comorbidity_key, comorbidity_name) in self.morbidities_db:
-            #TODO: method argumen contex_size
-            regex = r'((\w+\W+){0,5}\b'+comorbidity_name+r'\b(\W+\w+){0,5})'
-            for morbid_mention in re.finditer(regex, self.lower_text):
-                context_mention = '...'+(morbid_mention.groups()[0]).replace('\n', ' ')+'...'
-                comorbidity_info = {'descripción': comorbidity_name,
-                                    'mención': context_mention,
-                                    'wikidata': '{}{}'.format(self.wikidata_url, comorbidity_key)}
+        for morbid_mention in self.deseases_re.finditer(self.lower_text):
+            context_mention = '...'+(morbid_mention.groups()[0]).replace('\n', ' ')+'...'
+            morbid_name = morbid_mention.groups()[2]
+            comorbidity_key = self.deseases_dict[morbid_name]
+            comorbidity_info = {'descripción': morbid_mention.groups()[2],
+                                'mención': context_mention,
+                                'wikidata': '{}{}'.format(self.wikidata_url, comorbidity_key)}
 
-                if not comorbidity_key in self.clues['comorbilidades']:
-                    self.clues['comorbilidades'][comorbidity_key] = [comorbidity_info]
-                    continue
+            if not comorbidity_key in self.clues['comorbilidades']:
+                self.clues['comorbilidades'][comorbidity_key] = [comorbidity_info]
+                continue
 
-                self.clues['comorbilidades'][comorbidity_key].append(comorbidity_info)
+            self.clues['comorbilidades'][comorbidity_key].append(comorbidity_info)
 
     def check_sampling(self):
         """match covid-19 sampling mentions"""

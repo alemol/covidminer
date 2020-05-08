@@ -107,15 +107,15 @@ class PlotGenerator(object):
         return [i for i in range(20) if cooc & (1 << i)]
 
 
-class ExcelGenerator(object):
-    """generates Excel table for daily COVID-19 report"""
-    def __init__(self, excels_dir=EXCELS_DIR):
-        super(ExcelGenerator, self).__init__()
-        self.excels_dir = excels_dir
+# class ExcelGenerator(object):
+#     """generates Excel table for daily COVID-19 report"""
+#     def __init__(self, excels_dir=EXCELS_DIR):
+#         super(ExcelGenerator, self).__init__()
+#         self.excels_dir = excels_dir
 
-    def build_report(JSONS_dir):
-        """creates the excel file from all JSONS"""
-        pass
+#     def build_report(JSONS_dir):
+#         """creates the excel file from all JSONS"""
+#         pass
 
 
 if __name__ == '__main__':
