@@ -50,6 +50,35 @@ canonical_symptoms_name = {
 
 canonical_symptoms_order = ['Q38933','Q35805', 'Q767485','Q344873', 'Q188008', 'Q86','Q9690','Q40878','Q114085','Q474959','Q647099','Q485831','Q5445','Q1076369','Q3508755']
 
+canonical_comorb_names = {
+    'Q23900716':   'enfermedad ocupacional cardiovascular',
+    'Q55789055':   'enfermedad cardiovascular rara',
+    'Q18555060':   'aterosclerosis cardiovascular',
+    'Q736715':   'insuficiencia renal crónica',
+    'Q389735':   'enfermedad cardiovascular',
+    'Q877827':   'cetoacidosis diabética',
+    'Q631361':   'etinopatía diabética',
+    'Q41861':   'hipertensión arterial',
+    'Q126691':   'diabetes gestacional',
+    'Q220551':   'diabetes insípida',
+    'Q1455316':   'inmunosupresión',
+    'Q826759':   'asma aguda severa',
+    'Q2551913':   'asma ocupacional',
+    'Q3025883':   'diabetes tipo 2',
+    'Q124407':   'diabetes tipo 1',
+    'Q52856':   'pie diabético',
+    'Q663041':   'diabetes mody',
+    'Q939364':   'cardiopatías',
+    'Q662860':   'tabaquismo',
+    'Q332428':   'sobrepeso',
+    'Q12206':   'diabetes',
+    'Q12174':   'obesidad',
+    'Q12199':   'vih/sida',
+    'Q199804':   'epoc',
+    'Q35869':   'asma',
+    'Q15787':   'vih'
+}
+
 def covid19():
     symptoms_path = join(HOME, COVID19_DATA)
     return load_csv(symptoms_path)

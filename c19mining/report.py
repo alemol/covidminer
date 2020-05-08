@@ -107,7 +107,26 @@ class PlotGenerator(object):
         return [i for i in range(20) if cooc & (1 << i)]
 
 
+class ExcelGenerator(object):
+    """generates Excel table for daily COVID-19 report"""
+    def __init__(self, excels_dir=EXCELS_DIR):
+        super(ExcelGenerator, self).__init__()
+        self.excels_dir = excels_dir
+
+    def build_report(JSONS_dir):
+        """creates the excel file from all JSONS"""
+        pass
+
+
 if __name__ == '__main__':
+
+    # symptoms report
     csv_path = HOME+'/data/cooccurrences_of_symptoms.csv'
     plot_gen = PlotGenerator()
     plot_gen.cooccurrences(csv_path)
+
+    # excel table report
+    cut_directory = HOME+'data/corte_SEDESA_22_abril_2020'
+    excel_gen = ExcelGenerator()
+    excel_gen.build_report(cut_directory)
+

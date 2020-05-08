@@ -16,9 +16,10 @@ from c19mining.utils import (HOME, explore_dir,
                              wiki_symptoms, wiki_deseases,
                              covid19_sampling, covid19_comorbidities,
                              wiki_deseases_regex, wiki_symptoms_regex,
-                             canonical_symptoms_name, canonical_symptoms_order)
-
+                             canonical_symptoms_name, canonical_comorb_names,
+                             canonical_symptoms_order)
 import re
+import pandas as pd
 import simplejson as json
 
 
@@ -121,12 +122,11 @@ class CovidJsonParser(object):
         # TODO: add 'fecha' as second column and all symptoms
         super(CovidJsonParser, self).__init__()
         self.symptoms = canonical_symptoms_name
+        self.comorbs = canonical_comorb_names
         self.symptcols_order = canonical_symptoms_order
 
-    def symptoms_occurrences(self, medical_register):
-        """A binary presence/absence symptoms list"""
-
-        # depending on the object will open a file or not
+    def register_as_dict(self, medical_register):
+        """depending on the object will open a file or not"""
         if isinstance(medical_register, dict):
             json_register = medical_register
         elif os.path.exists(medical_register):
@@ -135,10 +135,87 @@ class CovidJsonParser(object):
         else:
             print(medical_register, 'KO')
             json_register = None
+        return json_register
+
+    def symptoms_occurrences(self, medical_register):
+        """A binary presence/absence symptoms list"""
+        json_register = self.register_as_dict(medical_register)
 
         presence_absence = [(self.symptoms[code], (code in json_register['síntomas']))
                             for code in self.symptcols_order]
         return presence_absence
+
+    def comorbidities_dfval(self, medical_register):
+        """return one single dataframe string value"""
+        json_register = self.register_as_dict(medical_register)
+
+        # list comorbidities by canonical names
+        comorbs = ', '.join([self.comorbs[code] for (code,_) in json_register['comorbilidades'].items()])
+        evidence = ''
+        # TODO making work this
+        #evidence = ', '.join([x['mención'] for x in comorb_list for c, comorb_list in json_register['comorbilidades'].items()]) 
+        # for c, comorb_list in json_register['comorbilidades'].items():
+        #     evidence = ', '.join([x['mención'] for x in comorb_list])
+        return(comorbs, evidence)
+
+    def covid_diagnosis_dfval(self, medical_register):
+        """return diagnosis as single dataframe string value"""
+        json_register = self.register_as_dict(medical_register)
+        # list COVID-19 diagnosis found
+        covid_diagnosis = []
+        evidence = ''
+        for (code, info) in json_register['COVID-19'].items():
+            descriptions = [item['descripción'] for item in info]
+            mentions = [item['mención'] for item in info]
+            covid_diagnosis += list(set(descriptions))
+            evidence += ', '.join(mentions)
+
+        covid_diagnosis = ', '.join(covid_diagnosis)
+        return(covid_diagnosis, evidence)
+
+    def symptoms_dfval(self, medical_register):
+        """return diagnosis as single dataframe string value"""
+        json_register = self.register_as_dict(medical_register)
+
+        # list symptoms found
+        symptoms = []
+        evidence = ''
+        for (code, info) in json_register['síntomas'].items():
+            descriptions = [item['descripción'] for item in info]
+            mentions = [item['mención'] for item in info]
+            symptoms += list(set(descriptions))
+            evidence += ', '.join(mentions)
+
+        symptoms = ', '.join(symptoms)
+        return(symptoms, evidence)
+
+    def dir_to_dataframe(self, jsons_inputdir):
+        """Read a set of JSON by MedNotesMiner to form a pandas data frame"""
+
+        registers = []
+        for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
+            d = {'No.': 1,
+             'NHC': 325498,
+             'Nombre (s)': 'Juan',
+             'Apellido paterno': 'Pérez',
+             'Apellido Materno': 'Gómez',
+            }
+
+            comorbs, comorbs_evidence = self.comorbidities_dfval(MedNote_path)
+            d.update({'Comorbilidad': comorbs})
+
+            covid_diagnosis, covid_diagnosis_evidence = self.covid_diagnosis_dfval(MedNote_path)
+            d.update({'Diagnóstico': covid_diagnosis})
+            # print(covid_diagnosis_evidence)
+
+            symptoms, symptoms_evidence = self.symptoms_dfval(MedNote_path)
+            d.update({'Síntomas': symptoms})
+            # print(symptoms_evidence)
+            registers.append(d)
+        # create df
+        df = pd.DataFrame(data=registers)
+        print(df)
+        return(df)
 
     def dir_to_csv(self, jsons_inputdir, sep=','):
         """Read a set of JSON by MedNotesMiner to form a symptoms table"""
@@ -200,24 +277,26 @@ class OpenNLPTagger(object):
 
 if __name__ == '__main__':
 
-    # corte_dir = HOME+"/data/corte_SEDESA_22_abril_2020/"
-    # parser = CovidJsonParser()
+    corte_dir = HOME+"/data/corte_SEDESA_22_abril_2020/"
+    parser = CovidJsonParser()
     # csv_symptoms = parser.dir_to_csv(corte_dir)
     # print(csv_symptoms)
-    s = '''Durante los paroxismos de tos estos pacientes se tornan muy cianóticos y llegan incluso a quedar inconscientes .
-La tos de otros distintos tipos puede estar producida por la estimulación de terminaciones nerviosas situadas en la mucosa bronquial .
-La tos de la bronquitis aguda presenta características similares a la de la traqueítis , pero a menudo está precedida o acompañada por estertores transitorios y por una sensación de opresión difusa en el pecho .
-En los primeros momentos es seca ; fiando posteriormente se hace productiva , se transforma a la vez en suelta e indolora .
-La tos de la bronquitis crónica tiende a presentarse en paroxismos prolongados , que culminan casi siempre con la producción de esputo .
-Sin embargo , cuando éste es muy espeso o existe una alteración importante de la función ventilatoria , el paciente , agotado por los esfuerzos de la tos , puede cesar en sus esfuerzos por eliminar las secreciones bronquiales , y el episodio de tos concluye sin ningún resultado .
-Esta tos inconclusa , como la describen algunos pacientes , es típica de la bronquitis crónica avanzada .
-Los ataques de tos en estos pacientes a menudo producen disnea intensa , frecuentemente acompañada de estertores , y suelen ser muy penosos .
-La tos de la bronquitis crónica presenta otras características típicas ; es más frecuente e intensa cuando el paciente se acuesta , y aún más cuando se levanta por la mañana , debido los cambios bruscos de posición y a las variaciones en la temperatura del aire inspirado las que está expuesto en esos momentos .
-Raramente se ve interrumpido el sueño por alguna tos muy rara , pero la mayoría de los pacientes con bronquitis crónica se despiertan por la mañana con un ligero estertor y una sensación de opresión en el pecho , síntomas que no mejoran hasta que no se produce la expectoración mediante un violento taque de tos que puede prolongarse durante varios minutos .
-La tos de la bronquitis crónica se ve estimulada , además de por los cambios en la temperatura atmosférica , por irritantes bronquiales como el humo del tabaco , gases o polvo , y por el incremento súbito en la profundidad de las respiraciones producido por el ejercicio y por la risa .
-Algunos pacientes pueden sufrir un síncope por tos ( página 38 ) durante las crisis de tos prolongada y violenta .'''
 
-    tagger = OpenNLPTagger()
-    tagged = tagger.tagbyreg(s)
-    print(tagged)
+    parser.dir_to_dataframe(corte_dir)
+
+#     s = '''Durante los paroxismos de tos estos pacientes se tornan muy cianóticos y llegan incluso a quedar inconscientes .
+# La tos de otros distintos tipos puede estar producida por la estimulación de terminaciones nerviosas situadas en la mucosa bronquial .
+# La tos de la bronquitis aguda presenta características similares a la de la traqueítis , pero a menudo está precedida o acompañada por estertores transitorios y por una sensación de opresión difusa en el pecho .
+# En los primeros momentos es seca ; fiando posteriormente se hace productiva , se transforma a la vez en suelta e indolora .
+# La tos de la bronquitis crónica tiende a presentarse en paroxismos prolongados , que culminan casi siempre con la producción de esputo .
+# Sin embargo , cuando éste es muy espeso o existe una alteración importante de la función ventilatoria , el paciente , agotado por los esfuerzos de la tos , puede cesar en sus esfuerzos por eliminar las secreciones bronquiales , y el episodio de tos concluye sin ningún resultado .
+# Esta tos inconclusa , como la describen algunos pacientes , es típica de la bronquitis crónica avanzada .
+# Los ataques de tos en estos pacientes a menudo producen disnea intensa , frecuentemente acompañada de estertores , y suelen ser muy penosos .
+# La tos de la bronquitis crónica presenta otras características típicas ; es más frecuente e intensa cuando el paciente se acuesta , y aún más cuando se levanta por la mañana , debido los cambios bruscos de posición y a las variaciones en la temperatura del aire inspirado las que está expuesto en esos momentos .
+# Raramente se ve interrumpido el sueño por alguna tos muy rara , pero la mayoría de los pacientes con bronquitis crónica se despiertan por la mañana con un ligero estertor y una sensación de opresión en el pecho , síntomas que no mejoran hasta que no se produce la expectoración mediante un violento taque de tos que puede prolongarse durante varios minutos .
+# La tos de la bronquitis crónica se ve estimulada , además de por los cambios en la temperatura atmosférica , por irritantes bronquiales como el humo del tabaco , gases o polvo , y por el incremento súbito en la profundidad de las respiraciones producido por el ejercicio y por la risa .
+# Algunos pacientes pueden sufrir un síncope por tos ( página 38 ) durante las crisis de tos prolongada y violenta .'''
+#     tagger = OpenNLPTagger()
+#     tagged = tagger.tagbyreg(s)
+#     print(tagged)
 
