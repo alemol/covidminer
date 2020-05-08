@@ -16,6 +16,8 @@ from c19mining.utils import (HOME, explore_dir,
                              wiki_symptoms, wiki_deseases,
                              covid19_sampling, covid19_comorbidities,
                              wiki_deseases_regex, wiki_symptoms_regex,
+                             context_covid_regex, covid_namedict,
+                             context_morbidities_regex, morbidities_namedict,
                              context_symptoms_regex, symptoms_namedict,
                              context_deseases_regex, deseases_namedict,
                              canonical_symptoms_name, canonical_comorb_names,
@@ -41,31 +43,33 @@ class MedNotesMiner(object):
             self.sampling_db = covid19_sampling()
         if not morbidities_db:
             self.morbidities_db = covid19_comorbidities()
-
-        self.symptoms_re = context_symptoms_regex()
-        self.symptoms_dict = symptoms_namedict()
         self.deseases_re = context_deseases_regex()
         self.deseases_dict = deseases_namedict()
+        self.covid_re = context_covid_regex()
+        self.covid_dict = covid_namedict()
+        self.symptoms_re = context_symptoms_regex()
+        self.symptoms_dict = symptoms_namedict()
+        self.morbidities_re = context_morbidities_regex()
+        self.morbidities_dict = morbidities_namedict()
 
     def check_covid19(self, lower_case=True):
         """match covid-19 mentions"""
         self.clues['COVID-19'] = {}
 
         # seek for covid matches
-        for (covid_key, covid_name) in self.covid19_db:
-            #TODO: method argumen contex_size
-            regex = r'((\w+\W+){0,5}\b'+covid_name+r'\b(\W+\w+){0,5})'
-            for covid_mention in re.finditer(regex, self.lower_text):
-                context_mention = '...'+(covid_mention.groups()[0]).replace('\n', ' ')+'...'
-                covid_info = {'descripción': covid_name,
-                              'mención': context_mention,
-                              'wikidata': '{}{}'.format(self.wikidata_url, covid_key)}
+        for covid_mention in self.covid_re.finditer(self.lower_text):
+            context_mention = '...'+(covid_mention.groups()[0]).replace('\n', ' ')+'...'
+            name = covid_mention.groups()[2]
+            key = self.covid_dict[name]
+            info = {'descripción': covid_mention.groups()[2],
+                            'mención': context_mention,
+                            'wikidata': '{}{}'.format(self.wikidata_url, key)}
 
-                if not covid_key in self.clues['COVID-19']:
-                    self.clues['COVID-19'][covid_key] = [covid_info]
-                    continue
+            if not key in self.clues['COVID-19']:
+                self.clues['COVID-19'][key] = [info]
+                continue
 
-                self.clues['COVID-19'][covid_key].append(covid_info)
+            self.clues['COVID-19'][key].append(info)
 
     def check_symptoms(self, lower_case=True):
         """match covid-19 symptoms"""
@@ -91,10 +95,10 @@ class MedNotesMiner(object):
         self.clues['comorbilidades'] = {}
 
         # seek for comorbidities matches
-        for morbid_mention in self.deseases_re.finditer(self.lower_text):
+        for morbid_mention in self.morbidities_re.finditer(self.lower_text):
             context_mention = '...'+(morbid_mention.groups()[0]).replace('\n', ' ')+'...'
             morbid_name = morbid_mention.groups()[2]
-            comorbidity_key = self.deseases_dict[morbid_name]
+            comorbidity_key = self.morbidities_dict[morbid_name]
             comorbidity_info = {'descripción': morbid_mention.groups()[2],
                                 'mención': context_mention,
                                 'wikidata': '{}{}'.format(self.wikidata_url, comorbidity_key)}

@@ -18,7 +18,7 @@ import pandas as pd
 HOME = str(Path(dirname(abspath(__file__))).parent)
 COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
-COVID19_COMORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
+COVID19_MORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
 COVID19_SAMPLING = 'resources/muestras.txt'
 WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
 WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
@@ -115,6 +115,16 @@ def wiki_deseases_regex():
     regex = csv2regex(data_path)
     return regex
 
+def context_covid_regex():
+    data_path = join(HOME, COVID19_DATA)
+    regex = csv2contextregex(data_path)
+    return regex
+
+def covid_namedict():
+    data_path = join(HOME, COVID19_DATA)
+    namedict = load_names_dict(data_path)
+    return namedict
+
 def context_symptoms_regex():
     data_path = join(HOME, WIKI_SYMPTOMS_DATA)
     regex = csv2contextregex(data_path)
@@ -122,6 +132,16 @@ def context_symptoms_regex():
 
 def symptoms_namedict():
     data_path = join(HOME, WIKI_SYMPTOMS_DATA)
+    namedict = load_names_dict(data_path)
+    return namedict
+
+def context_morbidities_regex():
+    data_path = join(HOME, COVID19_MORBIDITIES_DATA)
+    regex = csv2contextregex(data_path)
+    return regex
+
+def morbidities_namedict():
+    data_path = join(HOME, COVID19_MORBIDITIES_DATA)
     namedict = load_names_dict(data_path)
     return namedict
 
@@ -136,7 +156,7 @@ def deseases_namedict():
     return namedict
 
 def covid19_comorbidities():
-    comorbidities_path = join(HOME, COVID19_COMORBIDITIES_DATA)
+    comorbidities_path = join(HOME, COVID19_MORBIDITIES_DATA)
     return load_csv(comorbidities_path)
 
 def covid19_sampling():
