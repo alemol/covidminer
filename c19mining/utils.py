@@ -115,6 +115,16 @@ def wiki_deseases_regex():
     regex = csv2regex(data_path)
     return regex
 
+def context_symptoms_regex():
+    data_path = join(HOME, WIKI_SYMPTOMS_DATA)
+    regex = csv2contextregex(data_path)
+    return regex
+
+def symptoms_namedict():
+    data_path = join(HOME, WIKI_SYMPTOMS_DATA)
+    namedict = load_names_dict(data_path)
+    return namedict
+
 def context_deseases_regex():
     data_path = join(HOME, WIKI_DESEASES_DATA)
     regex = csv2contextregex(data_path)
