@@ -6,7 +6,8 @@ The script `demo.py` is the minimal code example in Python 3.
 
 
 ```
-from c19mining.covid import MedNotesMiner, CovidJsonParser
+from c19mining.covid import MedNotesMiner
+
 import simplejson as json
 
 texto_urgencia = "Paciente masculino de 52 ..." # very long text
