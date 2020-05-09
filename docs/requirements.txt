@@ -6,3 +6,4 @@ pandas
 simplejson
 matplotlib
 mosestokenizer
+openpyxl

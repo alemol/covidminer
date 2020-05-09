@@ -211,28 +211,26 @@ class TableGenerator(object):
         concentrado  = list()
         evidencia    = list()
         for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
-            
             main_info = {
-                'NHC': self.random_Ndigits(6),
-                'Nombre (s)':'',
-                'Apellido paterno':'',
-                'Edad':'',
-                'Clave de la edad':'',
-                'Sexo':'',
-                'Fecha de Ingreso':'',
-                '¿Se realizó prueba?':'',
-                'Resultado de la prueba':'',
-                'Estado o País':'',
-                'Alcaldía o Municipio':'',
-                'Fecha de alta':'',
-                'Servicio (área donde está recibiendo atención el paciente)':'',
-                'Traslado (movimiento interno de un servicio a otro)':'',
-                'Clave Única de Establecimiento de Salud (CLUES)':'',
-                'Motivo de la Alta':'',
-                'Fecha de reingreso':'',
-                'Observaciones':''
+                 'NHC': self.random_Ndigits(6),
+            #     'Nombre (s)':'',
+            #     'Apellido paterno':'',
+            #     'Edad':'',
+            #     'Clave de la edad':'',
+            #     'Sexo':'',
+            #     'Fecha de Ingreso':'',
+            #     '¿Se realizó prueba?':'',
+            #     'Resultado de la prueba':'',
+            #     'Estado o País':'',
+            #     'Alcaldía o Municipio':'',
+            #     'Fecha de alta':'',
+            #     'Servicio (área donde está recibiendo atención el paciente)':'',
+            #     'Traslado (movimiento interno de un servicio a otro)':'',
+            #     'Clave Única de Establecimiento de Salud (CLUES)':'',
+            #     'Motivo de la Alta':'',
+            #     'Fecha de reingreso':'',
+            #     'Observaciones':''
             }
-
             evidence_info = dict()
 
             medical_register = self.register_as_dict(MedNote_path)
@@ -254,6 +252,23 @@ class TableGenerator(object):
 
             decease_evidence = self.decease_to_val(medical_register)
             evidence_info.update({'Menciones Defunción': decease_evidence})
+            main_info.update({'Nombre (s)':'',
+                'Apellido paterno':'',
+                'Edad':'',
+                'Clave de la edad':'',
+                'Sexo':'',
+                'Fecha de Ingreso':'',
+                '¿Se realizó prueba?':'',
+                'Resultado de la prueba':'',
+                'Estado o País':'',
+                'Alcaldía o Municipio':'',
+                'Fecha de alta':'',
+                'Servicio (área donde está recibiendo atención el paciente)':'',
+                'Traslado (movimiento interno de un servicio a otro)':'',
+                'Clave Única de Establecimiento de Salud (CLUES)':'',
+                'Motivo de la Alta':'',
+                'Fecha de reingreso':'',
+                'Observaciones':''})
 
             # append register
             concentrado.append(main_info)
@@ -269,6 +284,16 @@ class TableGenerator(object):
         with pd.ExcelWriter(output) as writer:
             df_concentrado.to_excel(writer, sheet_name='Concentrado 09052020')
             df_evidencia.to_excel(writer, sheet_name='Evidencia 09052020')
+            writer.sheets['Concentrado 09052020'].column_dimensions['B'].width = 7
+            writer.sheets['Concentrado 09052020'].column_dimensions['C'].width = 26
+            writer.sheets['Concentrado 09052020'].column_dimensions['D'].width = 36
+            writer.sheets['Concentrado 09052020'].column_dimensions['E'].width = 10
+            writer.sheets['Evidencia 09052020'].column_dimensions['B'].width = 100
+            writer.sheets['Evidencia 09052020'].column_dimensions['C'].width = 100
+            writer.sheets['Evidencia 09052020'].column_dimensions['D'].width = 100
+            writer.sheets['Evidencia 09052020'].column_dimensions['E'].width = 100
+            writer.sheets['Evidencia 09052020'].column_dimensions['F'].width = 100
+
 
     def dir_to_csv(self, jsons_inputdir, sep=','):
         """Read a set of JSON by MedNotesMiner to form a symptoms table"""
