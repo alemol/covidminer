@@ -187,7 +187,9 @@ Take a look
 
 ![cooccurrences_plot](plots/cooccurrences_plot.jpg)
 
+![excel generation](docs/imgs/excel1.png)
 
+![excel generation](docs/imgs/excel2.png)
 
 ## Dependencies
 
