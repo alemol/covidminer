@@ -6,9 +6,12 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
-
-import re
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
+
+from c19mining.utils import (wiki_deseases_regex, wiki_symptoms_regex,)
+import re
 from os.path import exists
 from mosestokenizer import *
 
@@ -74,6 +77,41 @@ class Tokenizer(object):
         return contents
 
 
+class OpenNLPTagger(object):
+    """OpenNLP Tagger for diseases and symptoms based on long lists"""
+    def __init__(self):
+        super(OpenNLPTagger, self).__init__()
+        self.symptoms_re = wiki_symptoms_regex()
+        self.deseases_re = wiki_deseases_regex()
+        self.tokenizer = Tokenizer()
+
+    def tagbyreg(self, text, split_sents=False):
+        """labelize symptoms and deseases ocurrences"""
+        # depending on the object will open a file or not
+        if isinstance(text, str):
+            lower_text = text.lower()
+        elif os.path.exists(text):
+            with open(text, 'r', encoding='utf-8') as fp:
+                lower_text = text.lower()
+        else:
+            print(text, 'KO')
+            lower_text = None
+        # prepare lines and tokens
+        if split_sents:
+            sentence_splitted = self.tokenizer.split_sentences(lower_text)
+            tokenized = self.tokenizer.split_tokens(sentence_splitted)
+        else:
+            tokenized = self.tokenizer.split_tokens(lower_text)
+        #  seek for symptoms and deaseses and tagg them
+        labeled = self.deseases_re.sub(r'<START:Desease> \g<matched> <END>', tokenized)
+        labeled = self.symptoms_re.sub(r'<START:Symptom> \g<matched> <END>', labeled)
+        # correct nasty nested tags if produced
+        nested =r'(?P<a><START:(Symptom|Desease)> (\w+ )*)<START:(Symptom|Desease)>(?P<b> (\w+ )+)<END>(?P<c> (\w+ )*<END>)'
+        corrected_labeled = re.sub(nested, r'\g<a>\g<b>\g<c>', labeled)
+        labeled_text = corrected_labeled.replace('  ',' ')
+        return(labeled_text)
+
+
 if __name__ == '__main__':
 
     input_string_nosents = '''INTRODUCCIÓN POSICIÓN ANATÓMICA
@@ -94,3 +132,8 @@ if __name__ == '__main__':
     tok_joined = t.join_tokens(tok_splitted)
     #after detokenization
     print(tok_joined)
+
+    
+    tagger = OpenNLPTagger()
+    tagged = tagger.tagbyreg(tok_splitted)
+    print(tagged)

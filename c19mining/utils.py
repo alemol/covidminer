@@ -25,12 +25,19 @@ WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
 WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
 COVID_DESEASE_DATA = 'resources/enf.csv'
 PLOTS_DIR = 'plots'
+EXCELS_DIR = 'excels'
 UPLOAD_DIRNAME = 'uploads'
 LOG_DIRNAME = 'log'
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
 
-# These are the symptoms to report and their canonical names
+# These are the canonical names to concept
+
+canonical_covid_name = {
+    'Q84263196':   'covid-19',
+    'Q2633267' :   'neumonía',
+}
+
 canonical_symptoms_name = {
     'Q38933':   'fiebre',
     'Q35805':   'tos',

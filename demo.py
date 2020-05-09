@@ -6,9 +6,10 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
+
 from c19mining.ocr import TesseOCR
-from c19mining.covid import MedNotesMiner, CovidJsonParser
-from c19mining.report import PlotGenerator
+from c19mining.covid import MedNotesMiner
+from c19mining.report import (PlotGenerator, TableGenerator)
 
 import simplejson as json
 
@@ -110,8 +111,8 @@ EN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.
 '''
 
 # When text extraction is needed you must apply the OCR class before mining the information.
-#my_ocr = TesseOCR('spa')
-#texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
+my_ocr = TesseOCR('spa')
+texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
 
 # Information Extraction
 covid_seeker = MedNotesMiner(texto_urgencia)
@@ -124,7 +125,7 @@ covid_seeker.check_comorbidities()
 covid_insights =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
 print(covid_insights)
  
-parser = CovidJsonParser()
+parser = TableGenerator()
 print(parser.symptoms_occurrences(covid_seeker.clues))
 
 # cooccurrences plot from data table obtained from symptoms_occurrences
