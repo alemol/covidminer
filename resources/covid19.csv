@@ -6,21 +6,24 @@ Q84263196	enfermedad por coronavirus
 Q84263196	enfermedad del coronavirus
 Q84263196	neumonía por coronavirus
 Q84263196	neumonia por coronavirus
-Q2633267	neumonía atípica
-Q2633267	neumonía atipica
-Q2633267	neumonia atípica
-Q2633267	neumonia atipica
+Q84263196	neumonía covid
+Q84263196	neumonia covid
 Q84263196	coronavirus
 Q84263196	covid-2019
 Q84263196	sars-cov-2
 Q84263196	2019-ncov
-Q2633267	pneumonía
 Q84263196	covid 19
 Q84263196	covid-19
 Q84263196	ncovd 19
 Q84263196	ncovd-19
-Q2633267	neumonía
-Q2633267	pneumonia
 Q84263196	covid19
 Q84263196	ncovd19
+Q84263196	covid
+Q2633267	pneumonía
+Q2633267	neumonía
+Q2633267	pneumonia
+Q2633267	neumonía atípica
+Q2633267	neumonía atipica
+Q2633267	neumonia atípica
+Q2633267	neumonia atipica
 Q2633267	neumonia

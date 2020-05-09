@@ -14,7 +14,7 @@ from c19mining.textprocessing import Tokenizer
 from c19mining.utils import (HOME, explore_dir,
                              sampling_regex, decease_regex,
                              wiki_deseases_regex, wiki_symptoms_regex,
-                             context_covid_regex, covid_namedict,
+                             covid19, covid_namedict,
                              context_morbidities_regex, morbidities_namedict,
                              context_symptoms_regex, symptoms_namedict,
                              context_deseases_regex, deseases_namedict,
@@ -32,42 +32,49 @@ class MedNotesMiner(object):
         self.wikidata_url = 'https://www.wikidata.org/wiki/'
         self.text = text_utf8
         self.clues = {'texto': self.text}
-        self.lower_text = self.text.lower()
+        self.working_text = self.preproc_tex()
         self.sampling_re = sampling_regex()
         self.decease_re = decease_regex()
-        self.covid_re = context_covid_regex()
+        self.covid19_db = covid19()
         self.covid_dict = covid_namedict()
         self.symptoms_re = context_symptoms_regex()
         self.symptoms_dict = symptoms_namedict()
         self.morbidities_re = context_morbidities_regex()
         self.morbidities_dict = morbidities_namedict()
 
+    def preproc_tex(self):
+        tokenizer = Tokenizer()
+        lower_text = self.text.lower()
+        tokenized = tokenizer.split_tokens(lower_text)
+        return tokenized
+
     def check_covid19(self, lower_case=True):
         """match covid-19 mentions"""
         self.clues['COVID-19'] = {}
 
         # seek for covid matches
-        for covid_mention in self.covid_re.finditer(self.lower_text):
-            context_mention = '...'+(covid_mention.groups()[0]).replace('\n', ' ')+'...'
-            name = covid_mention.groups()[2]
-            key = self.covid_dict[name]
-            info = {'descripción': covid_mention.groups()[2],
-                            'mención': context_mention,
-                            'wikidata': '{}{}'.format(self.wikidata_url, key)}
+        for (covid_key, covid_name) in self.covid19_db:
+            #TODO: method argumen contex_size
+            regex = r'((\w+\W+){0,5}\b'+covid_name+r'\b(\W+\w+){0,5})'
+            for covid_mention in re.finditer(regex, self.working_text):
+                context_mention = '...'+(covid_mention.groups()[0]).replace('\n', ' ')+'...'
+                covid_info = {'descripción': covid_name,
+                              'mención': context_mention,
+                              'wikidata': '{}{}'.format(self.wikidata_url, covid_key)}
 
-            if not key in self.clues['COVID-19']:
-                self.clues['COVID-19'][key] = [info]
-                continue
+                if not covid_key in self.clues['COVID-19']:
+                    self.clues['COVID-19'][covid_key] = [covid_info]
+                    continue
 
-            self.clues['COVID-19'][key].append(info)
+                self.clues['COVID-19'][covid_key].append(covid_info)
 
     def check_symptoms(self, lower_case=True):
         """match covid-19 symptoms"""
         self.clues['síntomas'] = {}
 
         # seek for symptoms matches
-        for symptom_mention in self.symptoms_re.finditer(self.lower_text):
-            context_mention = '...'+(symptom_mention.groups()[0]).replace('\n', ' ')+'...'
+        for symptom_mention in self.symptoms_re.finditer(self.working_text):
+            context_mention = (symptom_mention.groups()[0]).replace('\n', ' ')
             symptom_name = symptom_mention.groups()[2]
             symptom_key = self.symptoms_dict[symptom_name]
             symptom_info = {'descripción': symptom_mention.groups()[2],
@@ -76,17 +83,16 @@ class MedNotesMiner(object):
 
             if not symptom_key in self.clues['síntomas']:
                 self.clues['síntomas'][symptom_key] = [symptom_info]
-                continue
-
-            self.clues['síntomas'][symptom_key].append(symptom_info)
+            else:
+                self.clues['síntomas'][symptom_key].append(symptom_info)
 
     def check_comorbidities(self, lower_case=True):
         """match covid-19 comorbidities"""
         self.clues['comorbilidades'] = {}
 
         # seek for comorbidities matches
-        for morbid_mention in self.morbidities_re.finditer(self.lower_text):
-            context_mention = '...'+(morbid_mention.groups()[0]).replace('\n', ' ')+'...'
+        for morbid_mention in self.morbidities_re.finditer(self.working_text):
+            context_mention = (morbid_mention.groups()[0]).replace('\n', ' ')
             morbid_name = morbid_mention.groups()[2]
             comorbidity_key = self.morbidities_dict[morbid_name]
             comorbidity_info = {'descripción': morbid_mention.groups()[2],
@@ -95,17 +101,16 @@ class MedNotesMiner(object):
 
             if not comorbidity_key in self.clues['comorbilidades']:
                 self.clues['comorbilidades'][comorbidity_key] = [comorbidity_info]
-                continue
-
-            self.clues['comorbilidades'][comorbidity_key].append(comorbidity_info)
+            else:
+                self.clues['comorbilidades'][comorbidity_key].append(comorbidity_info)
 
     def check_sampling(self):
         """match covid-19 sampling mentions"""
         self.clues['muestreos'] = []
 
         # seek for sampling matches
-        for sampling_mention in self.sampling_re.finditer(self.lower_text):
-            context_mention = '...'+(sampling_mention.groups()[0]).replace('\n', ' ')+'...'
+        for sampling_mention in self.sampling_re.finditer(self.working_text):
+            context_mention = (sampling_mention.groups()[0]).replace('\n', ' ')
             self.clues['muestreos'].append({'mención': context_mention})
 
     def check_decease(self):
@@ -113,8 +118,8 @@ class MedNotesMiner(object):
         self.clues['defunciones'] = []
 
         # seek for decease matches
-        for decease_mention in self.decease_re.finditer(self.lower_text):
-            context_mention = '...'+(decease_mention.groups()[0]).replace('\n', ' ')+'...'
+        for decease_mention in self.decease_re.finditer(self.working_text):
+            context_mention = (decease_mention.groups()[0]).replace('\n', ' ')
             self.clues['defunciones'].append({'mención': context_mention})
 
 
@@ -281,10 +286,11 @@ if __name__ == '__main__':
 
     corte_dir = HOME+"/data/corte_SEDESA_22_abril_2020/"
     parser = CovidJsonParser()
+    parser.dir_to_dataframe(corte_dir)
+
+    # csv table with symptoms coocurrences
     # csv_symptoms = parser.dir_to_csv(corte_dir)
     # print(csv_symptoms)
-
-    parser.dir_to_dataframe(corte_dir)
 
 # TODO: Move this to module NER
 #     s = '''Durante los paroxismos de tos estos pacientes se tornan muy cianóticos y llegan incluso a quedar inconscientes .

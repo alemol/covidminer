@@ -94,6 +94,7 @@ def covid19():
         covid_seeker.check_covid19()
         covid_seeker.check_symptoms()
         covid_seeker.check_sampling()
+        covid_seeker.check_decease()
         covid_seeker.check_comorbidities()
         jsons =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
         logging.info('OCR OK')

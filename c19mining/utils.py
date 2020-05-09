@@ -84,6 +84,11 @@ def covid19():
     symptoms_path = join(HOME, COVID19_DATA)
     return load_csv(symptoms_path)
 
+def covid_regex():
+    data_path = join(HOME, COVID19_DATA)
+    regex = csv2regex(data_path)
+    return regex
+
 def covid19_symptoms():
     symptoms_path = join(HOME, COVID19_SYMPTOMS_DATA)
     return load_csv(symptoms_path)
@@ -201,19 +206,22 @@ def mkdir(out, name):
 def list2contextregex(path, context_size=6):
     with open(path) as f:
         joined = '|'.join([l.strip('\n') for l in f.readlines()])
-    regex = r'((\w+\W+){0,6}('+joined+r')(\W+\w+){0,6})'
-    return re.compile(regex)
+    regex = r'((\w+\W+){0,5}('+joined+r')(\W+\w+){0,5})'
+    compiled = re.compile(regex)
+    return compiled
 
 def csv2regex(path):
     tuple_list = load_csv(path)
     regex = r'(?P<matched>'+('|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list]))+')'
-    return re.compile(regex)
+    compiled = re.compile(regex)
+    return compiled
 
 def csv2contextregex(path, context_size=6):
     tuple_list = load_csv(path)
     joined = '|'.join([r'\b'+name+r'\b' for (_, name) in tuple_list])
-    regex = r'((\w+\W+){0,6}('+joined+r')(\W+\w+){0,6})'
-    return re.compile(regex)
+    regex = r'((\w+\W+){0,5}('+joined+r')(\W+\w+){0,5})'
+    compiled = re.compile(regex)
+    return compiled
 
 def explore_dir(explore_dir, yield_extension='txt'):
     for root, directory, files in os.walk(explore_dir, topdown=True):

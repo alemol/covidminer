@@ -110,14 +110,15 @@ EN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.
 '''
 
 # When text extraction is needed you must apply the OCR class before mining the information.
-# my_ocr = TesseOCR('spa')
-# texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
+#my_ocr = TesseOCR('spa')
+#texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
 
 # Information Extraction
 covid_seeker = MedNotesMiner(texto_urgencia)
 covid_seeker.check_covid19()
 covid_seeker.check_symptoms()
 covid_seeker.check_sampling()
+covid_seeker.check_decease()
 covid_seeker.check_comorbidities()
 
 covid_insights =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)

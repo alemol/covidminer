@@ -49,7 +49,7 @@ class Tokenizer(object):
         with MosesSentenceSplitter('es') as splitsents:
             sentences = ''
             for line in contents:
-                if re.match(r'\s*\n',line):
+                if re.match(r'\s*\n',line) or line=='':
                     sentences +='\n'
                 else:
                     sentences += '\n'.join(splitsents([line]))+'\n'
