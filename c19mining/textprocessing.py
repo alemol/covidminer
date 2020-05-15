@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
-from c19mining.utils import (wiki_deseases_regex, wiki_symptoms_regex,)
+from c19mining.utils import (wiki_deseases_regex, wiki_symptoms_regex, drugs_regex)
 import re
 from os.path import exists
 from mosestokenizer import *
@@ -51,8 +51,8 @@ class Tokenizer(object):
         contents = self.list_of_str(text)
         with MosesSentenceSplitter('es') as splitsents:
             sentences = ''
-            for line in contents:
-                if re.match(r'\s*\n',line) or line=='':
+            for line in contents:                
+                if line == '' or re.match(r'\s+', line):
                     sentences +='\n'
                 else:
                     sentences += '\n'.join(splitsents([line]))+'\n'
@@ -83,6 +83,7 @@ class OpenNLPTagger(object):
         super(OpenNLPTagger, self).__init__()
         self.symptoms_re = wiki_symptoms_regex()
         self.deseases_re = wiki_deseases_regex()
+        self.drugs_re = drugs_regex()
         self.tokenizer = Tokenizer()
 
     def tagbyreg(self, text, split_sents=False):
@@ -105,8 +106,9 @@ class OpenNLPTagger(object):
         #  seek for symptoms and deaseses and tagg them
         labeled = self.deseases_re.sub(r'<START:Desease> \g<matched> <END>', tokenized)
         labeled = self.symptoms_re.sub(r'<START:Symptom> \g<matched> <END>', labeled)
+        labeled = self.drugs_re.sub(r'<START:Drug> \g<matched> <END>', labeled)
         # correct nasty nested tags if produced
-        nested =r'(?P<a><START:(Symptom|Desease)> (\w+ )*)<START:(Symptom|Desease)>(?P<b> (\w+ )+)<END>(?P<c> (\w+ )*<END>)'
+        nested =r'(?P<a><START:(Symptom|Desease|Drug)> (\w+ )*)<START:(Symptom|Desease|Drug)>(?P<b> (\w+ )+)<END>(?P<c> (\w+ )*<END>)'
         corrected_labeled = re.sub(nested, r'\g<a>\g<b>\g<c>', labeled)
         labeled_text = corrected_labeled.replace('  ',' ')
         return(labeled_text)

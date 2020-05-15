@@ -26,6 +26,7 @@ LANGUAGE = 'spa'
 app.config['JSON_AS_ASCII'] = False
 app.config['UPLOAD_FOLDER'] = uploads_dir()
 
+my_ocr = TesseOCR(LANGUAGE)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -53,7 +54,7 @@ def upload_file():
 @app.route('/covid19', methods=["POST"])
 def covid19():
     logging.info('*covid19 request.files*')
-    logging.info('Reciving file ...')
+    logging.info('Receiving file ...')
     logging.info(request.files)
     # check if the post request has the file part
     if 'file' not in request.files:
@@ -76,7 +77,6 @@ def covid19():
 
     # OCR stage
     logging.info('OCR ...')
-    my_ocr = TesseOCR(LANGUAGE)
     try:
         pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         if 'pdf' in pdf_path:
@@ -106,27 +106,42 @@ def covid19():
 
 @app.route('/ocr', methods=["POST"])
 def ocr():
-    try:
-        logging.info('OCR LANGUAGE '+LANGUAGE)
-        LANGUAGE = request.json['lang']
-    except Exception as e:
-        logging.info('OCR default language eng')
-        LANGUAGE = 'eng'
+    logging.info('*OCR request.files*')
+    logging.info('Receiving file ...')
+    logging.info(request.files)
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        resp = jsonify({'message' : 'No file part in the request'})
+        resp.status_code = 400
+        return resp
+    file = request.files['file']
+    if file.filename == '':
+        resp = jsonify({'message' : 'No file selected for uploading'})
+        resp.status_code = 400
+        return resp
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        logging.info('File OK')
+    else:
+        resp = jsonify({'message' : 'Not Allowed file type'})
+        resp.status_code = 400
+        return resp
 
-    my_ocr = TesseOCR(LANGUAGE)
-
+    # OCR stage
+    logging.info('OCR ...')
     try:
-        url = request.json['image']
-        if 'jpg' in url:
-            logging.info(url)
-            output = my_ocr.get_text(url)
-            logging.info('OK')
-            return({"text": output})
+        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if 'pdf' in pdf_path:
+            logging.info(pdf_path)
+            ocred_text = my_ocr.get_text_from_pdf(pdf_path)
+            logging.info('OCR OK')
         else:
-            return jsonify({"error": "only .jpg files, please"})
+            return jsonify({"error": "only .pdf files, please"})
     except:
         abort(500)
 
+    return ocred_text
 
 @app.errorhandler(500)
 def internal_error(error):

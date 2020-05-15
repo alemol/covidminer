@@ -61,7 +61,7 @@ se debe tener un directorio de uploads a donde van a cargarse los pdfs (cuidado 
 
 ---
 
-
+probando machine learning...
 
 OpenNLP 1.9.2. 
 amolina@Mac:~/repo/covidminer/mldata$cat minitrain.txt | wc -l
@@ -125,4 +125,114 @@ Wrote name finder model to
 path: /Users/amolina/repo/covidminer/mldata/es-covidmini.bin
 
 Execution time: 124.305 seconds
+
+
+---
+
+(venv) amolina@Mac:~/repo/covidminer$python scripts/tagcorpus.py /Users/amolina/repo/covidminer/mldata/IULACorpus  /Users/amolina/repo/covidminer/mldata/pretagged
+
+(venv) amolina@Mac:~/repo/covidminer/mldata$for f in ./pretagged/*txt; do (cat "${f}"; echo) >> ./train_iulapretagged.txt; done
+
+
+La que el enfermo considera <START:Desease> eyaculación precoz <END>. no
+<END>\. ([a-zA-Z])
+<END> \1
+
+([a-zA-Z])\.<START
+\1 <START
+
+
+...
+
+(venv) amolina@Mac:~/repo/covidminer/mldata$opennlp TokenNameFinderTrainer -model mx-med.bin -lang es -data train_iulapretagged.txt -encoding UTF-8 -params params.txt
+Indexing events with TwoPass using cutoff of 4
+
+  Computing event counts...  done. 5018453 events
+  Indexing...  done.
+Collecting events... Done indexing in 184.03 s.
+Incorporating indexed data for training...  
+done.
+  Number of Event Tokens: 5018453
+      Number of Outcomes: 7
+    Number of Predicates: 725787
+Computing model parameters...
+Performing 100000 iterations.
+  1:  . (5008180/5018453) 0.9979529548249232
+  2:  . (5014227/5018453) 0.9991579078253796
+  3:  . (5015538/5018453) 0.9994191437082304
+  4:  . (5015992/5018453) 0.9995096098339469
+  5:  . (5016312/5018453) 0.9995733745040554
+  6:  . (5016579/5018453) 0.9996265781506771
+  7:  . (5016729/5018453) 0.9996564678397905
+  8:  . (5016909/5018453) 0.9996923354667265
+  9:  . (5016995/5018453) 0.9997094722218182
+ 10:  . (5017074/5018453) 0.9997252141247512
+ 20:  . (5017479/5018453) 0.9998059162853573
+Stopping: change in training set accuracy less than 1.0E-5
+Stats: (5016506/5018453) 0.9996120318353086
+...done.
+
+Training data summary:
+#Sentences: 182784
+#Tokens: 5018453
+#Drug entities: 508
+#Desease entities: 20488
+#Symptom entities: 4805
+
+Writing name finder model ... Compressed 725787 parameters to 56711
+77 outcome patterns
+done (1.714s)
+
+Wrote name finder model to
+path: /Users/amolina/repo/covidminer/mldata/mx-med.bin
+
+Execution time: 330.671 seconds
+
+
+
+---
+
+(venv) amolina@Mac:~/repo/covidminer/mldata$opennlp TokenNameFinderTrainer -model mx-med2.bin -lang es -data train_iulapretagged.txt -encoding UTF-8 -params params.txt
+Indexing events with TwoPass using cutoff of 3
+
+  Computing event counts...  done. 5018453 events
+  Indexing...  done.
+Collecting events... Done indexing in 176.57 s.
+Incorporating indexed data for training...  
+done.
+  Number of Event Tokens: 5018453
+      Number of Outcomes: 7
+    Number of Predicates: 930452
+Computing model parameters...
+Performing 150000 iterations.
+  1:  . (5008230/5018453) 0.9979629180546276
+  2:  . (5014500/5018453) 0.999212307059566
+  3:  . (5015674/5018453) 0.9994462436930265
+  4:  . (5016273/5018453) 0.9995656031848859
+  5:  . (5016606/5018453) 0.9996319582947175
+  6:  . (5016846/5018453) 0.9996797817972989
+  7:  . (5017016/5018453) 0.999713656778294
+  8:  . (5017192/5018453) 0.9997487273468537
+  9:  . (5017269/5018453) 0.9997640707205986
+ 10:  . (5017338/5018453) 0.9997778199775907
+ 20:  . (5017684/5018453) 0.9998467655271455
+Stopping: change in training set accuracy less than 1.0E-5
+Stats: (5017750/5018453) 0.9998599169903554
+...done.
+
+Training data summary:
+#Sentences: 182784
+#Tokens: 5018453
+#Drug entities: 508
+#Desease entities: 20488
+#Symptom entities: 4805
+
+Writing name finder model ... Compressed 930452 parameters to 56995
+69 outcome patterns
+done (1.911s)
+
+Wrote name finder model to
+path: /Users/amolina/repo/covidminer/mldata/mx-med2.bin
+
+Execution time: 350.571 seconds
 

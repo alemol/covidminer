@@ -20,6 +20,7 @@ import simplejson as json
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from random import randint
+from datetime import datetime
 
 
 class PlotGenerator(object):
@@ -206,30 +207,21 @@ class TableGenerator(object):
             evidence = '\n'.join([item['mención'] for item in decease])
         return evidence
 
-    def dir_to_excel(self, jsons_inputdir, output='output.xlsx'):
+    def dir_to_excel(self, jsons_inputdir, out_directory=None):
         """Read a set of JSON by MedNotesMiner to form a excel"""
+
+        # path to generated excel
+        if not out_directory:
+            out_directory = self.excels_dir
+        now = datetime.now()
+        dt_string = now.strftime("%d_%m_%Y_%Hh%M")    
+        output = os.path.join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
+
         concentrado  = list()
         evidencia    = list()
         for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
             main_info = {
                  'NHC': self.random_Ndigits(6),
-            #     'Nombre (s)':'',
-            #     'Apellido paterno':'',
-            #     'Edad':'',
-            #     'Clave de la edad':'',
-            #     'Sexo':'',
-            #     'Fecha de Ingreso':'',
-            #     '¿Se realizó prueba?':'',
-            #     'Resultado de la prueba':'',
-            #     'Estado o País':'',
-            #     'Alcaldía o Municipio':'',
-            #     'Fecha de alta':'',
-            #     'Servicio (área donde está recibiendo atención el paciente)':'',
-            #     'Traslado (movimiento interno de un servicio a otro)':'',
-            #     'Clave Única de Establecimiento de Salud (CLUES)':'',
-            #     'Motivo de la Alta':'',
-            #     'Fecha de reingreso':'',
-            #     'Observaciones':''
             }
             evidence_info = dict()
 
@@ -278,22 +270,40 @@ class TableGenerator(object):
         df_concentrado = pd.DataFrame(data=concentrado)
         print(df_concentrado)
         df_evidencia = pd.DataFrame(data=evidencia)
-        print(df_evidencia)
+        print(df_evidencia)        
 
         # write excel
         with pd.ExcelWriter(output) as writer:
             df_concentrado.to_excel(writer, sheet_name='Concentrado 09052020')
             df_evidencia.to_excel(writer, sheet_name='Evidencia 09052020')
-            writer.sheets['Concentrado 09052020'].column_dimensions['B'].width = 7
-            writer.sheets['Concentrado 09052020'].column_dimensions['C'].width = 26
-            writer.sheets['Concentrado 09052020'].column_dimensions['D'].width = 36
-            writer.sheets['Concentrado 09052020'].column_dimensions['E'].width = 10
-            writer.sheets['Evidencia 09052020'].column_dimensions['B'].width = 100
-            writer.sheets['Evidencia 09052020'].column_dimensions['C'].width = 100
-            writer.sheets['Evidencia 09052020'].column_dimensions['D'].width = 100
-            writer.sheets['Evidencia 09052020'].column_dimensions['E'].width = 100
-            writer.sheets['Evidencia 09052020'].column_dimensions['F'].width = 100
+            writer.sheets['Concentrado 09052020'].column_dimensions['B'].width = 9
+            writer.sheets['Concentrado 09052020'].column_dimensions['C'].width = 36
+            writer.sheets['Concentrado 09052020'].column_dimensions['D'].width = 46
+            writer.sheets['Concentrado 09052020'].column_dimensions['E'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['F'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['G'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['H'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['I'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['J'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['K'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['L'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['M'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['N'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['O'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['P'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['Q'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['R'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['S'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['T'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['U'].width = 20
+            writer.sheets['Concentrado 09052020'].column_dimensions['V'].width = 20
 
+            writer.sheets['Evidencia 09052020'].column_dimensions['B'].width = 80
+            writer.sheets['Evidencia 09052020'].column_dimensions['C'].width = 80
+            writer.sheets['Evidencia 09052020'].column_dimensions['D'].width = 80
+            writer.sheets['Evidencia 09052020'].column_dimensions['E'].width = 80
+            writer.sheets['Evidencia 09052020'].column_dimensions['F'].width = 80
+        print('Creado', output)
 
     def dir_to_csv(self, jsons_inputdir, sep=','):
         """Read a set of JSON by MedNotesMiner to form a symptoms table"""
@@ -321,13 +331,13 @@ class TableGenerator(object):
 
 if __name__ == '__main__':
 
-    corte_dir = HOME+"/data/corte_SEDESA_8_mayo/"
-    table_gen = TableGenerator()
+    cut_directory = HOME+'/data/corte_SEDESA_13_mayo'
+    cut_directory = sys.argv[1]
 
     # excel table report
-    cut_directory = HOME+'/data/corte_SEDESA_8_mayo'    
+    table_gen = TableGenerator()
     excel_created = table_gen.dir_to_excel(cut_directory)
 
     # csv table with symptoms coocurrences
-    # csv_symptoms = table_gen.dir_to_csv(corte_dir)
+    # csv_symptoms = table_gen.dir_to_csv(cut_directory)
     # print(csv_symptoms)

@@ -24,6 +24,7 @@ COVID19_DECEASE = 'resources/decesos.txt'
 WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
 WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
 COVID_DESEASE_DATA = 'resources/enf.csv'
+DRUGS_DATA = 'resources/drogas.txt'
 PLOTS_DIR = 'plots'
 EXCELS_DIR = 'excels'
 UPLOAD_DIRNAME = 'uploads'
@@ -126,6 +127,11 @@ def covid_deseases_regex():
 def wiki_deseases_regex():
     data_path = join(HOME, WIKI_DESEASES_DATA)
     regex = csv2regex(data_path)
+    return regex
+
+def drugs_regex():
+    symptoms_path = join(HOME, DRUGS_DATA)
+    regex = csv2regex(symptoms_path)
     return regex
 
 def context_covid_regex():
