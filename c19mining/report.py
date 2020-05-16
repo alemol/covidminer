@@ -217,13 +217,15 @@ class TableGenerator(object):
         dt_string = now.strftime("%d_%m_%Y_%Hh%M")    
         output = os.path.join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
 
-        concentrado  = list()
-        evidencia    = list()
+        concentrado = list()
+        evidencia = list()
+        sintomas = list()
         for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
             main_info = {
                  'NHC': self.random_Ndigits(6),
             }
             evidence_info = dict()
+            sintomas_info = dict()
 
             medical_register = self.register_as_dict(MedNote_path)
 
@@ -262,47 +264,53 @@ class TableGenerator(object):
                 'Fecha de reingreso':'',
                 'Observaciones':''})
 
+            sintomas_info.update({self.symptoms[code]: (code in medical_register['síntomas'])
+             for code in self.symptcols_order})
+
             # append register
             concentrado.append(main_info)
             evidencia.append(evidence_info)
+            sintomas.append(sintomas_info)
 
         # create dfs
         df_concentrado = pd.DataFrame(data=concentrado)
         print(df_concentrado)
         df_evidencia = pd.DataFrame(data=evidencia)
         print(df_evidencia)        
-
+        df_sintomas = pd.DataFrame(data=sintomas)
         # write excel
         with pd.ExcelWriter(output) as writer:
-            df_concentrado.to_excel(writer, sheet_name='Concentrado 09052020')
-            df_evidencia.to_excel(writer, sheet_name='Evidencia 09052020')
-            writer.sheets['Concentrado 09052020'].column_dimensions['B'].width = 9
-            writer.sheets['Concentrado 09052020'].column_dimensions['C'].width = 36
-            writer.sheets['Concentrado 09052020'].column_dimensions['D'].width = 46
-            writer.sheets['Concentrado 09052020'].column_dimensions['E'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['F'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['G'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['H'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['I'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['J'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['K'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['L'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['M'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['N'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['O'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['P'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['Q'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['R'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['S'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['T'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['U'].width = 20
-            writer.sheets['Concentrado 09052020'].column_dimensions['V'].width = 20
-
-            writer.sheets['Evidencia 09052020'].column_dimensions['B'].width = 80
-            writer.sheets['Evidencia 09052020'].column_dimensions['C'].width = 80
-            writer.sheets['Evidencia 09052020'].column_dimensions['D'].width = 80
-            writer.sheets['Evidencia 09052020'].column_dimensions['E'].width = 80
-            writer.sheets['Evidencia 09052020'].column_dimensions['F'].width = 80
+            df_concentrado.to_excel(writer, sheet_name='Concentrado'+'09052020')
+            df_evidencia.to_excel(writer, sheet_name='Evidencia'+'09052020')
+            df_sintomas.to_excel(writer, sheet_name='sintomas'+'09052020')
+            # TODO: move this shit
+            writer.sheets['Concentrado09052020'].column_dimensions['B'].width = 9
+            writer.sheets['Concentrado09052020'].column_dimensions['C'].width = 36
+            writer.sheets['Concentrado09052020'].column_dimensions['D'].width = 46
+            writer.sheets['Concentrado09052020'].column_dimensions['E'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['F'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['G'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['H'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['I'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['J'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['K'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['L'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['M'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['N'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['O'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['P'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['Q'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['R'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['S'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['T'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['U'].width = 20
+            writer.sheets['Concentrado09052020'].column_dimensions['V'].width = 20
+            # TODO: move this shit
+            writer.sheets['Evidencia09052020'].column_dimensions['B'].width = 80
+            writer.sheets['Evidencia09052020'].column_dimensions['C'].width = 80
+            writer.sheets['Evidencia09052020'].column_dimensions['D'].width = 80
+            writer.sheets['Evidencia09052020'].column_dimensions['E'].width = 80
+            writer.sheets['Evidencia09052020'].column_dimensions['F'].width = 80
         print('Creado', output)
 
     def dir_to_csv(self, jsons_inputdir, sep=','):
