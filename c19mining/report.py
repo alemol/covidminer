@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from random import randint
 from datetime import datetime
+import string
 
 
 class PlotGenerator(object):
@@ -264,7 +265,7 @@ class TableGenerator(object):
                 'Fecha de reingreso':'',
                 'Observaciones':''})
 
-            sintomas_info.update({self.symptoms[code]: (code in medical_register['síntomas'])
+            sintomas_info.update({self.symptoms[code]: ('V' if code in medical_register['síntomas'] else 'F')
              for code in self.symptcols_order})
 
             # append register
@@ -282,36 +283,17 @@ class TableGenerator(object):
         with pd.ExcelWriter(output) as writer:
             df_concentrado.to_excel(writer, sheet_name='Concentrado'+'09052020')
             df_evidencia.to_excel(writer, sheet_name='Evidencia'+'09052020')
-            df_sintomas.to_excel(writer, sheet_name='sintomas'+'09052020')
-            # TODO: move this shit
-            writer.sheets['Concentrado09052020'].column_dimensions['B'].width = 9
-            writer.sheets['Concentrado09052020'].column_dimensions['C'].width = 36
-            writer.sheets['Concentrado09052020'].column_dimensions['D'].width = 46
-            writer.sheets['Concentrado09052020'].column_dimensions['E'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['F'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['G'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['H'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['I'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['J'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['K'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['L'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['M'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['N'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['O'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['P'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['Q'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['R'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['S'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['T'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['U'].width = 20
-            writer.sheets['Concentrado09052020'].column_dimensions['V'].width = 20
-            # TODO: move this shit
-            writer.sheets['Evidencia09052020'].column_dimensions['B'].width = 80
-            writer.sheets['Evidencia09052020'].column_dimensions['C'].width = 80
-            writer.sheets['Evidencia09052020'].column_dimensions['D'].width = 80
-            writer.sheets['Evidencia09052020'].column_dimensions['E'].width = 80
-            writer.sheets['Evidencia09052020'].column_dimensions['F'].width = 80
+            df_sintomas.to_excel(writer, sheet_name='síntomas'+'09052020')
+            # set shit width
+            self.set_width(writer, 'Concentrado09052020', 'B', 'V', 40)
+            self.set_width(writer, 'Evidencia09052020', 'B', 'F', 40)
+            self.set_width(writer, 'síntomas09052020', 'B', 'Z', 15)
         print('Creado', output)
+
+    def set_width(self, writer, sheet_name, start, end, dwidth):
+        charmap = [c for c in list(string.ascii_uppercase) if (ord(c)>=ord(start) and ord(c)<=ord(end))]
+        for char in charmap:
+            writer.sheets[sheet_name].column_dimensions[char].width = dwidth
 
     def dir_to_csv(self, jsons_inputdir, sep=','):
         """Read a set of JSON by MedNotesMiner to form a symptoms table"""
