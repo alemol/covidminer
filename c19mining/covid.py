@@ -16,9 +16,7 @@ from c19mining.utils import (HOME, explore_dir,
                              covid19, covid_namedict,
                              context_morbidities_regex, morbidities_namedict,
                              context_symptoms_regex, symptoms_namedict,
-                             context_deseases_regex, deseases_namedict,
-                             canonical_symptoms_name, canonical_comorb_names,
-                             canonical_symptoms_order)
+                             context_deseases_regex, deseases_namedict)
 import re
 import pandas as pd
 import simplejson as json

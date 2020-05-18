@@ -22,9 +22,12 @@ COVID19_MORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
 COVID19_SAMPLING = 'resources/muestras.txt'
 COVID19_DECEASE = 'resources/decesos.txt'
 WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
+CANONICAL_SYMPTOMS = 'resources/canonical_symptoms.csv'
 WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
 COVID_DESEASE_DATA = 'resources/enf.csv'
 DRUGS_DATA = 'resources/drogas.txt'
+
+# OUTDIRS
 PLOTS_DIR = 'plots'
 EXCELS_DIR = 'excels'
 UPLOAD_DIRNAME = 'uploads'
@@ -38,26 +41,6 @@ canonical_covid_name = {
     'Q84263196':   'covid-19',
     'Q2633267' :   'neumonía',
 }
-
-canonical_symptoms_name = {
-    'Q38933':   'fiebre',
-    'Q35805':   'tos',
-    'Q767485':  'fallo_respiratorio',
-    'Q344873':  'sdra',
-    'Q188008':  'disnea',
-    'Q86':      'cefalea',
-    'Q9690':    'cansancio',
-    'Q40878':   'diarrea',
-    'Q114085':  'congestión_nasal',
-    'Q474959':  'mialgia',
-    'Q647099':  'hemoptisis',
-    'Q485831':  'linfopenia',
-    'Q5445':    'anemia',
-    'Q1076369': 'tormenta_de_citocinas',
-    'Q3508755': 'síndrome_gripal'
-}
-
-canonical_symptoms_order = ['Q38933','Q35805', 'Q767485','Q344873', 'Q188008', 'Q86','Q9690','Q40878','Q114085','Q474959','Q647099','Q485831','Q5445','Q1076369','Q3508755']
 
 canonical_comorb_names = {
     'Q23900716':   'enfermedad ocupacional cardiovascular',
@@ -87,6 +70,18 @@ canonical_comorb_names = {
     'Q35869':   'asma',
     'Q15787':   'vih'
 }
+
+def canonical_symptoms_order():
+    csymptoms_path = join(HOME, CANONICAL_SYMPTOMS)
+    with open(csymptoms_path, 'r') as f:
+        canonical_order = [l.split('\t')[0] for l in f.readlines()]
+    return canonical_order
+
+def canonical_symptoms_name():
+    csymptoms_path = join(HOME, CANONICAL_SYMPTOMS)
+    with open(csymptoms_path, 'r') as f:
+        canonical_names = {l.split('\t')[0]: (l.split('\t')[1]).strip('\n') for l in f.readlines()}
+    return canonical_names
 
 def covid19():
     symptoms_path = join(HOME, COVID19_DATA)
