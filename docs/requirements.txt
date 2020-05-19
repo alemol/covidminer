@@ -7,3 +7,4 @@ simplejson
 matplotlib
 mosestokenizer
 openpyxl
+nltk

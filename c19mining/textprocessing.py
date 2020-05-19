@@ -14,6 +14,7 @@ from c19mining.utils import (wiki_deseases_regex, wiki_symptoms_regex, drugs_reg
 import re
 from os.path import exists
 from mosestokenizer import *
+from nltk import word_tokenize
 
 
 class Tokenizer(object):
@@ -27,14 +28,12 @@ class Tokenizer(object):
         ...la parte de arriba son superiores ( craneales , rostrales ) , y las ...
         """
         contents = self.list_of_str(text)
-        #Moses tokenization
-        with MosesTokenizer(self.lang) as tokenize:
-            tokens = ''
-            for line in contents:
-                if line == '\n':
-                    tokens += '\n'
-                else:
-                    tokens += '{}\n'.format(' '.join(tokenize(line)))
+        tokens = ''
+        for line in contents:
+            if line == '\n':
+                tokens += '\n'
+            else:
+                tokens += '{}\n'.format(' '.join(word_tokenize(line)))
         return tokens
 
     def join_tokens(self, text):
@@ -89,14 +88,14 @@ class OpenNLPTagger(object):
     def tagbyreg(self, text, split_sents=False):
         """labelize symptoms and deseases ocurrences"""
         # depending on the object will open a file or not
-        if isinstance(text, str):
-            lower_text = text.lower()
-        elif os.path.exists(text):
+
+        if os.path.exists(text):
             with open(text, 'r', encoding='utf-8') as fp:
-                lower_text = text.lower()
+                lower_text = (fp.read()).lower()
         else:
             print(text, 'KO')
             lower_text = None
+
         # prepare lines and tokens
         if split_sents:
             sentence_splitted = self.tokenizer.split_sentences(lower_text)

@@ -125,10 +125,3 @@ covid_seeker.check_comorbidities()
 covid_insights =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
 print(covid_insights)
  
-parser = TableGenerator()
-# print(parser.symptoms_occurrences(covid_seeker.clues))
-
-# cooccurrences plot from data table obtained from symptoms_occurrences
-plot_gen = PlotGenerator()
-csv_path = 'data/cooccurrences_of_symptoms.csv'
-plot_gen.cooccurrences(csv_path)
