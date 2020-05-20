@@ -24,11 +24,12 @@ import simplejson as json
 
 class MedNotesMiner(object):
     """Medical notes data miner for Covid-19 insights"""
-    def __init__(self, text_utf8):
+    def __init__(self, text_utf8, init_data=None):
         super(MedNotesMiner, self).__init__()
         self.wikidata_url = 'https://www.wikidata.org/wiki/'
         self.text = text_utf8
-        self.clues = {'texto': self.text}
+        self.clues = init_data if init_data else dict()
+        self.clues['texto'] = self.text
         self.working_text = self.preproc_tex()
         self.sampling_re = sampling_regex()
         self.decease_re = decease_regex()
