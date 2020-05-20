@@ -116,7 +116,7 @@ class TableGenerator(object):
         if len(deceases) == 0:
             evidence = ''
         else:
-            evidence = '\n'.join([item['mención'] for item in decease])
+            evidence = '\n'.join([item['mención'] for item in deceases])
         return evidence
 
     def dir_to_excel(self, jsons_inputdir, out_directory=None):
@@ -200,6 +200,7 @@ class TableGenerator(object):
             print('Creado', output)
         except Exception as e:
             raise e
+        return(df_concentrado, df_evidencia, df_sintomas)
 
     def set_width(self, writer, sheet_name, start, end, dwidth):
         charmap = [c for c in list(string.ascii_uppercase) if (ord(c)>=ord(start) and ord(c)<=ord(end))]
@@ -322,13 +323,15 @@ class PlotGenerator(object):
 
 if __name__ == '__main__':
 
-    cut_directory = HOME+'/data/corte_SEDESA_13_mayo'
+    # cut_directory = HOME+'/data/corte_SEDESA_13_mayo'
     cut_directory = sys.argv[1]
 
     # excel table report
     table_gen = TableGenerator()
-    excel_created = table_gen.dir_to_excel(cut_directory)
+    (_,_,symptoms_df) = table_gen.dir_to_excel(cut_directory)
 
+    # plot_gen = PlotGenerator()
+    # plot_gen.cooccurrences(symptoms_df.iloc[:, : 15])
     # csv table with symptoms coocurrences
     # csv_symptoms = table_gen.dir_to_csv(cut_directory)
     # print(csv_symptoms)
