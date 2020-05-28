@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
 
 from c19mining.utils import (HOME, PLOTS_DIR, EXCELS_DIR, explore_dir,
                              canonical_symptoms_name, canonical_symptoms_order,
+                             canonical_comorbs_name, canonical_comorbs_order,
                              canonical_comorb_names, canonical_covid_name)
 
 import numpy as np
@@ -31,7 +32,8 @@ class TableGenerator(object):
         self.excels_dir = excels_dir
         self.symptoms = canonical_symptoms_name()
         self.symptcols_order = canonical_symptoms_order()
-        self.comorbs = canonical_comorb_names
+        self.comorbs = canonical_comorbs_name()
+        self.comorbscols_order = canonical_comorbs_order()
 
     def random_Ndigits(self, n):
         range_start = 10**(n-1)
@@ -119,7 +121,7 @@ class TableGenerator(object):
             evidence = '\n'.join([item['mención'] for item in deceases])
         return evidence
 
-    def dir_to_excel(self, jsons_inputdir, out_directory=None):
+    def dir_to_excel(self, jsons_inputdir, out_directory=None, only_covid=False):
         """Read a set of JSON by MedNotesMiner to form a excel"""
 
         # path to generated excel
@@ -132,75 +134,75 @@ class TableGenerator(object):
         concentrado = list()
         evidencia = list()
         sintomas = list()
+        comorbilidades = list()
         for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
-            main_info = {
-                 'NHC': self.random_Ndigits(6),
-            }
             evidence_info = dict()
             sintomas_info = dict()
+            comorbs_info = dict()
 
             medical_register = self.register_as_dict(MedNote_path)
+            # If report must include only COVID detected
+            if (only_covid and len(medical_register['COVID-19']) == 0):
+                continue
+
+            main_info = {'NHC': medical_register['NHC'],
+            'Nombre (s)': medical_register['Nombre'],
+                'Apellido paterno': medical_register['Apellido Paterno'],
+                'Apellido Materno': medical_register['Apellido Materno'],
+                'Fecha de Ingreso':medical_register['Fecha de Ingreso'],
+                'Servicio': 'Urgencias'}
 
             symptoms, symptoms_evidence = self.symptoms_to_val(medical_register)
             main_info.update({'Síntomas': symptoms})
             evidence_info.update({'Menciones Síntomas': symptoms_evidence})
 
+            covid_diagnosis, covid_diagnosis_evidence = self.covid_diagnosis_to_val(medical_register)
+            main_info.update({'Diagnóstico COVID-19': covid_diagnosis})
+            evidence_info.update({'Menciones Diagnóstico': covid_diagnosis_evidence})
+
             comorbs, comorbs_evidence = self.comorbidities_to_val(medical_register)
             main_info.update({'Comorbilidad': comorbs})
             evidence_info.update({'Menciones Comorbilidad': comorbs_evidence})
-
-            covid_diagnosis, covid_diagnosis_evidence = self.covid_diagnosis_to_val(medical_register)
-            main_info.update({'Diagnóstico': covid_diagnosis})
-            evidence_info.update({'Menciones Diagnóstico': covid_diagnosis_evidence})
 
             samplings_evidence = self.sampling_to_val(medical_register)
             evidence_info.update({'Menciones Pruebas': samplings_evidence})
 
             decease_evidence = self.decease_to_val(medical_register)
             evidence_info.update({'Menciones Defunción': decease_evidence})
-            main_info.update({'Nombre (s)':'',
-                'Apellido paterno':'',
-                'Edad':'',
-                'Clave de la edad':'',
-                'Sexo':'',
-                'Fecha de Ingreso':'',
-                '¿Se realizó prueba?':'',
-                'Resultado de la prueba':'',
-                'Estado o País':'',
-                'Alcaldía o Municipio':'',
-                'Fecha de alta':'',
-                'Servicio':'',
-                'Traslado':'',
-                'CLUES':'',
-                'Motivo de la Alta':'',
-                'Fecha de reingreso':'',
-                'Observaciones':''})
 
-            sintomas_info.update({self.symptoms[code]: ('V' if code in medical_register['síntomas'] else 'F')
+            # symptoms boolean matrix
+            sintomas_info.update({self.symptoms[code]: (True if code in medical_register['síntomas'] else False)
              for code in self.symptcols_order})
+            # comorbs boolean matrix
+            comorbs_info.update({self.comorbs[code]: (True if code in medical_register['comorbilidades'] else False)
+             for code in self.comorbscols_order})
 
             # append register
             concentrado.append(main_info)
             evidencia.append(evidence_info)
             sintomas.append(sintomas_info)
+            comorbilidades.append(comorbs_info)
 
         # create dfs
         df_concentrado = pd.DataFrame(data=concentrado)
         df_sintomas = pd.DataFrame(data=sintomas)
+        df_comorbilidades = pd.DataFrame(data=comorbilidades)
         df_evidencia = pd.DataFrame(data=evidencia)
+
         # write excel
         try:
             with pd.ExcelWriter(output) as writer:
-                df_concentrado.to_excel(writer, sheet_name='Concentrado'+'09052020')
-                df_evidencia.to_excel(writer, sheet_name='Evidencia'+'09052020')
-                df_sintomas.to_excel(writer, sheet_name='síntomas'+'09052020')
+                df_concentrado.to_excel(writer, sheet_name='Concentrado '+'marzo-mayo-2020')
+                df_evidencia.to_excel(writer, sheet_name='Evidencia '+'marzo-mayo-2020')
+                df_sintomas.to_excel(writer, sheet_name='síntomas '+'marzo-mayo-2020')
+                df_comorbilidades.to_excel(writer, sheet_name='Comorbilidad'+'marzo-mayo-2020')
                 # set shit width
-                self.set_width(writer, 'Concentrado09052020', 'B', 'V', 30)
-                self.set_width(writer, 'Evidencia09052020', 'B', 'F', 40)
+                self.set_width(writer, 'Concentrado marzo-mayo-2020', 'B', 'V', 30)
+                self.set_width(writer, 'Evidencia marzo-mayo-2020', 'B', 'F', 40)
             print('Creado', output)
         except Exception as e:
             raise e
-        return(df_concentrado, df_evidencia, df_sintomas)
+        return(df_concentrado, df_evidencia, df_sintomas, df_comorbilidades)
 
     def set_width(self, writer, sheet_name, start, end, dwidth):
         charmap = [c for c in list(string.ascii_uppercase) if (ord(c)>=ord(start) and ord(c)<=ord(end))]
@@ -256,10 +258,11 @@ class PlotGenerator(object):
         df = df.loc[:, (df != False).any(axis=0)]
         symptoms = df.columns[2:]
         occurrences = df[symptoms].to_numpy()
-        #print(df)
+        # print('symptoms', symptoms)
+        # print('occurrences', occurrences)
         self.cooccurrences_plot(symptoms, occurrences)
 
-    def cooccurrences_plot(self, symptoms, occurrences, num_cooc=30, min_cooc_count=1, filename='cooccurrences_plot.jpg'):
+    def cooccurrences_plot(self, symptoms, occurrences, num_cooc=20, min_cooc_count=4, filename='cooccurrences_plot.jpg'):
         """create a plot of cooccurrences
         :param symptoms: list of S symptoms
         :param occurrences: NxS array of occurrences of each symptom for a list of N individuals
@@ -279,7 +282,7 @@ class PlotGenerator(object):
 
         fig, axs = plt.subplots(2, 2, sharex='col', sharey='row', figsize=(10, 5),
                                 gridspec_kw={'width_ratios': [1, 4], 'height_ratios': [2, 3],
-                                             'wspace': 0.55, 'hspace': 0.25, 'left': 0.04, 'right': 0.9})
+                                             'wspace': 0.55, 'hspace': 0.20, 'left': 0.04, 'right': 0.9})
         for ax in axs.ravel():
             for dir in ['left', 'right', 'top', 'bottom']:
                 ax.spines[dir].set_visible(False)
@@ -311,7 +314,7 @@ class PlotGenerator(object):
             occ = self.combined_number_to_list(cooc)
             ax.plot(np.full_like(occ, i), occ, 'ob-', color=color)
         axs[1, 1].set_xlabel('Co-ocurrencias')
-        fig.suptitle('Frecuencia de síntomas y Co-ocurrencias de síntomas asociados a COVID-19.'.format(len(occurrences)), fontsize=14)
+        fig.suptitle('Co-ocurrencias de síntomas asociados a COVID-19 (Urgencias, Marzo-Mayo 2020).'.format(len(occurrences)), fontsize=14)
         # TODO: no funciona bien format='eps'
         plt.savefig(os.path.join(HOME, self.plots_dir, filename))
 
@@ -328,10 +331,8 @@ if __name__ == '__main__':
 
     # excel table report
     table_gen = TableGenerator()
-    (_,_,symptoms_df) = table_gen.dir_to_excel(cut_directory)
-
+    (_,_,_,_) = table_gen.dir_to_excel(cut_directory, out_directory=None, only_covid=False)
+    # TODO repair
     # plot_gen = PlotGenerator()
-    # plot_gen.cooccurrences(symptoms_df.iloc[:, : 15])
-    # csv table with symptoms coocurrences
-    # csv_symptoms = table_gen.dir_to_csv(cut_directory)
-    # print(csv_symptoms)
+    # short_df = symptoms_df.iloc[:, : 100]
+    # plot_gen.cooccurrences(short_df)
