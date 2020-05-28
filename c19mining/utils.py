@@ -23,14 +23,15 @@ COVID19_SAMPLING = 'resources/muestras.txt'
 COVID19_DECEASE = 'resources/decesos.txt'
 WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
 CANONICAL_SYMPTOMS = 'resources/canonical_symptoms.csv'
+CANONICAL_COMORBS = 'resources/canonical_comorbilidades.csv'
 WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
 COVID_DESEASE_DATA = 'resources/enf.csv'
 DRUGS_DATA = 'resources/drogas.txt'
 
 # OUTDIRS
-PLOTS_DIR = 'plots'
-EXCELS_DIR = 'excels'
-UPLOAD_DIRNAME = 'uploads'
+PLOTS_DIR = 'data/plots'
+EXCELS_DIR = 'data/excels'
+UPLOAD_DIRNAME = 'data/uploads'
 LOG_DIRNAME = 'log'
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
@@ -80,6 +81,18 @@ def canonical_symptoms_order():
 def canonical_symptoms_name():
     csymptoms_path = join(HOME, CANONICAL_SYMPTOMS)
     with open(csymptoms_path, 'r') as f:
+        canonical_names = {l.split('\t')[0]: (l.split('\t')[1]).strip('\n') for l in f.readlines()}
+    return canonical_names
+
+def canonical_comorbs_order():
+    resource_path = join(HOME, CANONICAL_COMORBS)
+    with open(resource_path, 'r') as f:
+        canonical_order = [l.split('\t')[0] for l in f.readlines()]
+    return canonical_order
+
+def canonical_comorbs_name():
+    resource_path = join(HOME, CANONICAL_COMORBS)
+    with open(resource_path, 'r') as f:
         canonical_names = {l.split('\t')[0]: (l.split('\t')[1]).strip('\n') for l in f.readlines()}
     return canonical_names
 

@@ -48,6 +48,7 @@ class MedNotesMiner(object):
 
     def check_covid19(self, lower_case=True):
         """match covid-19 mentions"""
+        patch_pattern = r'(hospital receptor de covid|receptora de covid|hospital de concentracion para covid)'
         self.clues['COVID-19'] = {}
 
         # seek for covid matches
@@ -60,11 +61,14 @@ class MedNotesMiner(object):
                               'mención': context_mention,
                               'wikidata': '{}{}'.format(self.wikidata_url, covid_key)}
 
-                if not covid_key in self.clues['COVID-19']:
-                    self.clues['COVID-19'][covid_key] = [covid_info]
+                if re.search(patch_pattern, context_mention, flags=0):
+                    #print('Negación de "{}"" detectada:\n\n{}\n'.format(covid_name, context_mention))
                     continue
 
-                self.clues['COVID-19'][covid_key].append(covid_info)
+                if not covid_key in self.clues['COVID-19']:
+                    self.clues['COVID-19'][covid_key] = [covid_info]
+                else:
+                    self.clues['COVID-19'][covid_key].append(covid_info)
 
     def check_symptoms(self, lower_case=True):
         """match covid-19 symptoms"""
@@ -78,6 +82,11 @@ class MedNotesMiner(object):
             symptom_info = {'descripción': symptom_mention.groups()[2],
                             'mención': context_mention,
                             'wikidata': '{}{}'.format(self.wikidata_url, symptom_key)}
+
+            patch_pattern = r'(sin '+symptom_name+r'|niega '+symptom_name+r'|sin compañía de '+symptom_name+r'|ni '+symptom_name+r')'
+            if re.search(patch_pattern, context_mention, flags=0):
+                #print('Negación de "{}"" detectada:\n\n{}\n'.format(symptom_name, context_mention))
+                continue
 
             if not symptom_key in self.clues['síntomas']:
                 self.clues['síntomas'][symptom_key] = [symptom_info]
@@ -96,6 +105,11 @@ class MedNotesMiner(object):
             comorbidity_info = {'descripción': morbid_mention.groups()[2],
                                 'mención': context_mention,
                                 'wikidata': '{}{}'.format(self.wikidata_url, comorbidity_key)}
+
+            patch_pattern = r'(sin '+morbid_name+r'|niega '+morbid_name+r'|sin compañía de '+morbid_name+r'|ni '+morbid_name+r'|'+morbid_name+'nega'+r')'
+            if re.search(patch_pattern, context_mention, flags=0):
+                #print('Negación de "{}"" detectada:\n\n{}\n'.format(morbid_name, context_mention))
+                continue
 
             if not comorbidity_key in self.clues['comorbilidades']:
                 self.clues['comorbilidades'][comorbidity_key] = [comorbidity_info]
