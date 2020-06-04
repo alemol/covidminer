@@ -9,8 +9,6 @@
 
 from c19mining.ocr import TesseOCR
 from c19mining.covid import MedNotesMiner
-from c19mining.report import (PlotGenerator, TableGenerator)
-
 import simplejson as json
 
 

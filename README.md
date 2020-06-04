@@ -173,24 +173,31 @@ texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
 
 ```
 
-Anyway, from the extracted data its possible to get counts and tables for symptoms and comorbidities. And finally make reports and visualizations.
-
+Anyway, from the extracted data its possible to get counts and tables for symptoms and comorbidities and finally make reports and visualizations. I created the following outcomes from a collection of medical notes. The chart was made just by formating the comorbs data frame to be compatible with amCharts ©.
 
 ```
 from c19mining.report import PlotGenerator
 
-plot_gen = PlotGenerator()
-csv_path = 'data/cooccurrences_of_symptoms.csv'
-plot_gen.cooccurrences(csv_path)
+    notes_directory = sys.argv[1]
+
+    # build a excel report for all notes in a directory
+    report = ReportGenerator(notes_directory)
+    report.to_excel()
+
+    # data for amChart
+    amchart_gen = AmchartsGenerator()
+    am_symptoms = amchart_gen.pictorial_stacked_chart(report.df_symptoms, 10)
+    am_comorbs = amchart_gen.pictorial_stacked_chart(report.df_comorbs, 10)
 ```
 
-Take a look
-
-![cooccurrences_plot](plots/cooccurrences_plot.jpg)
+check this out
 
 ![excel generation](docs/imgs/excel1.png)
 
 ![excel generation](docs/imgs/excel2.png)
+
+![cooccurrences_plot](plots/amcharts.png)
+
 
 ## Dependencies
 
