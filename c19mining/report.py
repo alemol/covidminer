@@ -14,15 +14,12 @@ sys.path.append(join(dirname(__file__), ".", ".."))
 from c19mining.utils import (HOME, PLOTS_DIR, EXCELS_DIR, explore_dir,
                              canonical_symptoms_name, canonical_symptoms_order,
                              canonical_comorbs_name, canonical_comorbs_order,
-                             canonical_comorb_names, canonical_covid_name)
-
-import numpy as np
+                             canonical_covid_name)
+import string
 import pandas as pd
 import simplejson as json
 from collections import Counter
-from random import randint
 from datetime import datetime
-import string
 
 
 class ReportGenerator(object):
@@ -116,7 +113,8 @@ class ReportGenerator(object):
         if not out_directory:
             out_directory = self.excels_dir
         now = datetime.now()
-        dt_string = now.strftime("%d_%m_%Y_%Hh%M")    
+        #dt_string = now.strftime("%d_%m_%Y_%Hh%M")
+        dt_string = now.strftime("%d_%m_%Y")
         output = join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
 
         # write excel file
@@ -199,208 +197,6 @@ class ReportGenerator(object):
             writer.sheets[sheet_name].column_dimensions[char].width = dwidth
 
 
-class TableGenerator(object):
-    """generates csv and Excel formated tables for COVID-19 report"""
-    def __init__(self, excels_dir=EXCELS_DIR):
-        super(TableGenerator, self).__init__()
-        self.excels_dir = excels_dir
-        self.symptoms = canonical_symptoms_name()
-        self.symptcols_order = canonical_symptoms_order()
-        self.comorbs = canonical_comorbs_name()
-        self.comorbscols_order = canonical_comorbs_order()
-
-    def register_as_dict(self, medical_register):
-        """depending on the object will open a file or not"""
-        if isinstance(medical_register, dict):
-            json_register = medical_register
-        elif os.path.exists(medical_register):
-            with open(medical_register) as fp:
-                json_register = json.load(fp, encoding='utf-8')
-        else:
-            print(medical_register, 'KO')
-            json_register = None
-        return json_register
-
-    def symptoms_occurrences(self, medical_register):
-        """A binary presence/absence symptoms list"""
-        json_register = self.register_as_dict(medical_register)
-
-        presence_absence = [(self.symptoms[code], (code in json_register['síntomas']))
-                            for code in self.symptcols_order]
-        return presence_absence
-
-    def comorbidities_to_val(self, json_register):
-        """return one single dataframe string value"""
-        # list comorbidities by canonical names
-        comorbs = '\n'.join([self.comorbs[code] for (code,_) in json_register['comorbilidades'].items()])
-        evidence = ''
-        # list COVID-19 comorbidities found
-        comorbidities = []
-        evidence = ''
-        for (code, info) in json_register['comorbilidades'].items():
-            descriptions = [item['descripción'] for item in info]
-            mentions = [item['mención'] for item in info]
-            comorbidities += list(set(descriptions))
-            evidence += '\n'.join(mentions)
-
-        comorbidities = '\n'.join(comorbidities)
-        return(comorbidities, evidence)
-
-    def covid_diagnosis_to_val(self, json_register):
-        """return diagnosis as single dataframe string value"""
-        # list COVID-19 diagnosis found
-        covid_diagnosis = []
-        evidence = ''
-        for (code, info) in json_register['COVID-19'].items():
-            descriptions = [item['descripción'] for item in info]
-            mentions = [item['mención'] for item in info]
-            covid_diagnosis.append(code)
-            evidence += '\n'.join(mentions)
-
-        covid_diagnosis = '\n'.join([canonical_covid_name[code] for code in list(set(covid_diagnosis))])
-        return(covid_diagnosis, evidence)
-
-    def symptoms_to_val(self, json_register):
-        """return diagnosis as single dataframe string value"""
-        # list symptoms found
-        symptoms = []
-        evidence = ''
-        for (code, info) in json_register['síntomas'].items():
-            descriptions = [item['descripción'] for item in info]
-            mentions = [item['mención'] for item in info]
-            symptoms += list(set(descriptions))
-            evidence += '\n'.join(mentions)
-
-        symptoms = '\n'.join(symptoms)
-        return(symptoms, evidence)
-
-    def sampling_to_val(self, json_register):
-        samplings = json_register['muestreos']
-        if len(samplings) == 0:
-            evidence = ''
-        else:
-            evidence = '\n'.join([item['mención'] for item in samplings])
-        return evidence
-
-    def decease_to_val(self, json_register):
-        deceases = json_register['defunciones']
-        if len(deceases) == 0:
-            evidence = ''
-        else:
-            evidence = '\n'.join([item['mención'] for item in deceases])
-        return evidence
-
-    def dir_to_excel(self, jsons_inputdir, out_directory=None, only_covid=False):
-        """Read a set of JSON by MedNotesMiner to form a excel"""
-
-        # path to generated excel
-        if not out_directory:
-            out_directory = self.excels_dir
-        now = datetime.now()
-        dt_string = now.strftime("%d_%m_%Y_%Hh%M")    
-        output = join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
-
-        concentrado = list()
-        evidencia = list()
-        sintomas = list()
-        comorbilidades = list()
-        for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
-            evidence_info = dict()
-            sintomas_info = dict()
-            comorbs_info = dict()
-
-            medical_register = self.register_as_dict(MedNote_path)
-            # If report must include only COVID detected
-            if (only_covid and len(medical_register['COVID-19']) == 0):
-                continue
-
-            main_info = {'NHC': medical_register['NHC'],
-            'Nombre (s)': medical_register['Nombre'],
-                'Apellido paterno': medical_register['Apellido Paterno'],
-                'Apellido Materno': medical_register['Apellido Materno'],
-                'Fecha de Ingreso':medical_register['Fecha de Ingreso'],
-                'Servicio': 'Urgencias'}
-
-            symptoms, symptoms_evidence = self.symptoms_to_val(medical_register)
-            main_info.update({'Síntomas': symptoms})
-            evidence_info.update({'Menciones Síntomas': symptoms_evidence})
-
-            covid_diagnosis, covid_diagnosis_evidence = self.covid_diagnosis_to_val(medical_register)
-            main_info.update({'Diagnóstico COVID-19': covid_diagnosis})
-            evidence_info.update({'Menciones Diagnóstico': covid_diagnosis_evidence})
-
-            comorbs, comorbs_evidence = self.comorbidities_to_val(medical_register)
-            main_info.update({'Comorbilidad': comorbs})
-            evidence_info.update({'Menciones Comorbilidad': comorbs_evidence})
-
-            samplings_evidence = self.sampling_to_val(medical_register)
-            evidence_info.update({'Menciones Pruebas': samplings_evidence})
-
-            decease_evidence = self.decease_to_val(medical_register)
-            evidence_info.update({'Menciones Defunción': decease_evidence})
-
-            # symptoms boolean matrix
-            sintomas_info.update({self.symptoms[code]: (True if code in medical_register['síntomas'] else False)
-             for code in self.symptcols_order})
-            # comorbs boolean matrix
-            comorbs_info.update({self.comorbs[code]: (True if code in medical_register['comorbilidades'] else False)
-             for code in self.comorbscols_order})
-
-            # append register
-            concentrado.append(main_info)
-            evidencia.append(evidence_info)
-            sintomas.append(sintomas_info)
-            comorbilidades.append(comorbs_info)
-
-        # create dfs
-        df_concentrado = pd.DataFrame(data=concentrado)
-        df_sintomas = pd.DataFrame(data=sintomas)
-        df_comorbilidades = pd.DataFrame(data=comorbilidades)
-        df_evidencia = pd.DataFrame(data=evidencia)
-
-        # write excel
-        try:
-            with pd.ExcelWriter(output) as writer:
-                df_concentrado.to_excel(writer, sheet_name='Concentrado '+'marzo-mayo-2020')
-                df_evidencia.to_excel(writer, sheet_name='Evidencia '+'marzo-mayo-2020')
-                df_sintomas.to_excel(writer, sheet_name='síntomas '+'marzo-mayo-2020')
-                df_comorbilidades.to_excel(writer, sheet_name='Comorbilidad'+'marzo-mayo-2020')
-                # set shit width
-                self.set_width(writer, 'Concentrado marzo-mayo-2020', 'B', 'V', 30)
-                self.set_width(writer, 'Evidencia marzo-mayo-2020', 'B', 'F', 40)
-            print('Creado', output)
-        except Exception as e:
-            raise e
-        return(df_concentrado, df_evidencia, df_sintomas, df_comorbilidades)
-
-    def set_width(self, writer, sheet_name, start, end, dwidth):
-        charmap = [c for c in list(string.ascii_uppercase) if (ord(c)>=ord(start) and ord(c)<=ord(end))]
-        for char in charmap:
-            writer.sheets[sheet_name].column_dimensions[char].width = dwidth
-
-    def dir_to_csv(self, jsons_inputdir, sep=','):
-        """Read a set of JSON by MedNotesMiner to form a symptoms table"""
-
-        # header could be codes or names
-        # header = sep.join(['nota','fecha'])+sep+(sep.join([code for code in self.symptcols_order]))
-        header = sep.join(['nota','fecha'])+sep+(sep.join([self.symptoms[c] for c in self.symptcols_order]))
-        table = header+'\n'
-        date = '22/04/2020'
-        # walk inputdir to get the csv rows
-        for (MedNote_path, MedNote_bname) in explore_dir(jsons_inputdir, yield_extension='JSON'):
-            id_note = MedNote_bname.split('.')[0].split('_')[1]
-            try:
-                presence_absence = [str(presence) for (sympt, presence) in self.symptoms_occurrences(MedNote_path)]
-            except Exception as e:
-                # This is because it may fail with some bad formated jsons.
-                print(MedNote_path,'KO')
-                # TODO continue in productions, sometimes a problem from OCR could arise
-            presence_absence_str = sep.join(presence_absence)
-            row = id_note+sep+date+sep+presence_absence_str
-            table += row+'\n'
-        return table
-
-
 class AmchartsGenerator(object):
     """Data frames into Amcharts data formats"""
     def __init__(self):
@@ -427,4 +223,3 @@ if __name__ == '__main__':
     print(am_symptoms)
     am_comorbs = amchart_gen.pictorial_stacked_chart(report.df_comorbs, 10)
     print(am_comorbs)
-
