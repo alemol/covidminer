@@ -196,7 +196,7 @@ check this out
 
 ![excel generation](docs/imgs/excel2.png)
 
-![cooccurrences_plot](plots/amcharts.png)
+![Pictorial_Stacked_Chart](plots/amcharts.png)
 
 
 ## Dependencies
