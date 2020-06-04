@@ -8,7 +8,8 @@
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), ".", ".."))
+from os.path import (join, dirname)
+sys.path.append(join(dirname(__file__), ".", ".."))
 
 from c19mining.utils import (HOME, PLOTS_DIR, EXCELS_DIR, explore_dir,
                              canonical_symptoms_name, canonical_symptoms_order,
@@ -18,11 +19,184 @@ from c19mining.utils import (HOME, PLOTS_DIR, EXCELS_DIR, explore_dir,
 import numpy as np
 import pandas as pd
 import simplejson as json
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from collections import Counter
 from random import randint
 from datetime import datetime
 import string
+
+
+class ReportGenerator(object):
+    """creates a report from all medical notes in a directory"""
+    def __init__(self, mednotes_dir, excels_dir=EXCELS_DIR, only_covid=False):
+        super(ReportGenerator, self).__init__()
+        self.mednotes_dir = mednotes_dir
+        self.excels_dir = excels_dir
+        self.only_covid = only_covid
+        self.symptoms = canonical_symptoms_name()
+        self.symptcols_order = canonical_symptoms_order()
+        self.comorbs = canonical_comorbs_name()
+        self.comorbscols_order = canonical_comorbs_order()
+        self.data_frames()
+
+    def register_as_dict(self, medical_register):
+        """depending on the object will open a file or not"""
+        if isinstance(medical_register, dict):
+            json_register = medical_register
+        elif os.path.exists(medical_register):
+            with open(medical_register) as fp:
+                json_register = json.load(fp, encoding='utf-8')
+        else:
+            print(medical_register, 'KO')
+            json_register = None
+        return json_register
+
+    def data_frames(self, only_covid=False):
+        main_report = list()
+        evidence = list()
+        symptomsl = list()
+        comorbis = list()
+        for (MedNote_path, MedNote_bname) in explore_dir(self.mednotes_dir, yield_extension='JSON'):
+            evidence_info = dict()
+            sympt_info = dict()
+            comorbs_info = dict()
+
+            medical_register = self.register_as_dict(MedNote_path)
+            # If report must include only COVID detected
+            if (self.only_covid and len(medical_register['COVID-19']) == 0):
+                continue
+
+            main_info = {'NHC': medical_register['NHC'],
+            'Nombre (s)': medical_register['Nombre'],
+                'Apellido paterno': medical_register['Apellido Paterno'],
+                'Apellido Materno': medical_register['Apellido Materno'],
+                'Fecha de Ingreso':medical_register['Fecha de Ingreso'],
+                'Servicio': 'Urgencias'}
+
+            symptoms, symptoms_evidence = self.symptoms_to_val(medical_register)
+            main_info.update({'Síntomas': symptoms})
+            evidence_info.update({'Menciones Síntomas': symptoms_evidence})
+
+            covid_diagnosis, covid_diagnosis_evidence = self.covid_diagnosis_to_val(medical_register)
+            main_info.update({'Diagnóstico COVID-19': covid_diagnosis})
+            evidence_info.update({'Menciones Diagnóstico': covid_diagnosis_evidence})
+
+            comorbs, comorbs_evidence = self.comorbidities_to_val(medical_register)
+            main_info.update({'Comorbilidad': comorbs})
+            evidence_info.update({'Menciones Comorbilidad': comorbs_evidence})
+
+            samplings_evidence = self.sampling_to_val(medical_register)
+            evidence_info.update({'Menciones Pruebas': samplings_evidence})
+
+            decease_evidence = self.decease_to_val(medical_register)
+            evidence_info.update({'Menciones Defunción': decease_evidence})
+
+            # symptoms boolean matrix
+            sympt_info.update({self.symptoms[code]: (True if code in medical_register['síntomas'] else False)
+             for code in self.symptcols_order})
+            # comorbs boolean matrix
+            comorbs_info.update({self.comorbs[code]: (True if code in medical_register['comorbilidades'] else False)
+             for code in self.comorbscols_order})
+
+            # append register
+            main_report.append(main_info)
+            evidence.append(evidence_info)
+            symptomsl.append(sympt_info)
+            comorbis.append(comorbs_info)
+
+        # create dfs
+        self.df_report = pd.DataFrame(data=main_report)
+        self.df_symptoms = pd.DataFrame(data=symptomsl)
+        self.df_comorbs = pd.DataFrame(data=comorbis)
+        self.df_evidence = pd.DataFrame(data=evidence)
+
+    def to_excel(self, out_directory=None):
+        """Read a set of JSON by MedNotesMiner to form a excel"""
+
+        # path to generated excel
+        if not out_directory:
+            out_directory = self.excels_dir
+        now = datetime.now()
+        dt_string = now.strftime("%d_%m_%Y_%Hh%M")    
+        output = join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
+
+        # write excel file
+        try:
+            with pd.ExcelWriter(output) as writer:
+                self.df_report.to_excel(writer, sheet_name='Concentrado '+'marzo-mayo-2020')
+                self.df_evidence.to_excel(writer, sheet_name='Evidencia '+'marzo-mayo-2020')
+                self.df_symptoms.to_excel(writer, sheet_name='síntomas '+'marzo-mayo-2020')
+                self.df_comorbs.to_excel(writer, sheet_name='Comorbilidad'+'marzo-mayo-2020')
+                # set shit width
+                self.set_width(writer, 'Concentrado marzo-mayo-2020', 'B', 'V', 30)
+                self.set_width(writer, 'Evidencia marzo-mayo-2020', 'B', 'F', 40)
+        except Exception as e:
+            raise e
+
+    def comorbidities_to_val(self, json_register):
+        """return one single dataframe string value"""
+        # list comorbidities by canonical names
+        comorbs = '\n'.join([self.comorbs[code] for (code,_) in json_register['comorbilidades'].items()])
+        evidence = ''
+        # list COVID-19 comorbidities found
+        comorbidities = []
+        evidence = ''
+        for (code, info) in json_register['comorbilidades'].items():
+            descriptions = [item['descripción'] for item in info]
+            mentions = [item['mención'] for item in info]
+            comorbidities += list(set(descriptions))
+            evidence += '\n'.join(mentions)
+
+        comorbidities = '\n'.join(comorbidities)
+        return(comorbidities, evidence)
+
+    def covid_diagnosis_to_val(self, json_register):
+        """return diagnosis as single dataframe string value"""
+        # list COVID-19 diagnosis found
+        covid_diagnosis = []
+        evidence = ''
+        for (code, info) in json_register['COVID-19'].items():
+            descriptions = [item['descripción'] for item in info]
+            mentions = [item['mención'] for item in info]
+            covid_diagnosis.append(code)
+            evidence += '\n'.join(mentions)
+
+        covid_diagnosis = '\n'.join([canonical_covid_name[code] for code in list(set(covid_diagnosis))])
+        return(covid_diagnosis, evidence)
+
+    def symptoms_to_val(self, json_register):
+        """return diagnosis as single dataframe string value"""
+        # list symptoms found
+        symptoms = []
+        evidence = ''
+        for (code, info) in json_register['síntomas'].items():
+            descriptions = [item['descripción'] for item in info]
+            mentions = [item['mención'] for item in info]
+            symptoms += list(set(descriptions))
+            evidence += '\n'.join(mentions)
+
+        symptoms = '\n'.join(symptoms)
+        return(symptoms, evidence)
+
+    def sampling_to_val(self, json_register):
+        samplings = json_register['muestreos']
+        if len(samplings) == 0:
+            evidence = ''
+        else:
+            evidence = '\n'.join([item['mención'] for item in samplings])
+        return evidence
+
+    def decease_to_val(self, json_register):
+        deceases = json_register['defunciones']
+        if len(deceases) == 0:
+            evidence = ''
+        else:
+            evidence = '\n'.join([item['mención'] for item in deceases])
+        return evidence
+
+    def set_width(self, writer, sheet_name, start, end, dwidth):
+        charmap = [c for c in list(string.ascii_uppercase) if (ord(c)>=ord(start) and ord(c)<=ord(end))]
+        for char in charmap:
+            writer.sheets[sheet_name].column_dimensions[char].width = dwidth
 
 
 class TableGenerator(object):
@@ -34,11 +208,6 @@ class TableGenerator(object):
         self.symptcols_order = canonical_symptoms_order()
         self.comorbs = canonical_comorbs_name()
         self.comorbscols_order = canonical_comorbs_order()
-
-    def random_Ndigits(self, n):
-        range_start = 10**(n-1)
-        range_end = (10**n)-1
-        return randint(range_start, range_end)
 
     def register_as_dict(self, medical_register):
         """depending on the object will open a file or not"""
@@ -129,7 +298,7 @@ class TableGenerator(object):
             out_directory = self.excels_dir
         now = datetime.now()
         dt_string = now.strftime("%d_%m_%Y_%Hh%M")    
-        output = os.path.join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
+        output = join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
 
         concentrado = list()
         evidencia = list()
@@ -232,107 +401,30 @@ class TableGenerator(object):
         return table
 
 
-class PlotGenerator(object):
-    """Make Plots and data visualization"""
-    def __init__(self, plots_dir=PLOTS_DIR):
-        super(PlotGenerator, self).__init__()
-        self.plots_dir = plots_dir
-        self.canonical_symptoms_order = canonical_symptoms_order()[:14]
-        self.canonical_sympt_names = canonical_symptoms_name()
-        self.symptom_names = [self.canonical_sympt_names[code] for code in self.canonical_symptoms_order]
+class AmchartsGenerator(object):
+    """Data frames into Amcharts data formats"""
+    def __init__(self):
+        super(AmchartsGenerator, self).__init__()
 
-    def cooccurrences(self, data):
-        """create a plot of cooccurrences of symptoms or comorbities"""
-
-        # data could be DataFrame or the path to a csv table
-        if isinstance(data, pd.DataFrame):
-            df = data.loc[:, (data != False).any(axis=0)]
-        elif os.path.exists(data):
-            data_table = pd.read_csv(data, sep=',', parse_dates=True,
-                dtype={'nota': np.string_, 'fecha':np.datetime64}.update({s: np.bool for s in self.symptom_names}))
-            df = pd.DataFrame(columns=['nota', 'fecha']+self.symptom_names, data=data_table)
-        else:
-            print(data, 'KO')
-            df = None
-        # filter when columns with all False values
-        df = df.loc[:, (df != False).any(axis=0)]
-        symptoms = df.columns[2:]
-        occurrences = df[symptoms].to_numpy()
-        # print('symptoms', symptoms)
-        # print('occurrences', occurrences)
-        self.cooccurrences_plot(symptoms, occurrences)
-
-    def cooccurrences_plot(self, symptoms, occurrences, num_cooc=20, min_cooc_count=4, filename='cooccurrences_plot.jpg'):
-        """create a plot of cooccurrences
-        :param symptoms: list of S symptoms
-        :param occurrences: NxS array of occurrences of each symptom for a list of N individuals
-        :param num_cooc: number of cooccurrences to show, maximum would be 2**S - 1
-        :param min_cooc_count: minimum count of cooccurrences needed to be shown in the plot
-        """
-        color='C1'
-        num_symp = len(symptoms)
-        symp_sums = occurrences.sum(axis=0)
-        symp_order = symp_sums.argsort()
-        inv_symp_order = symp_order.argsort()
-        combinations = np.matmul(occurrences, (2 ** np.arange(num_symp))[inv_symp_order])
-        bins = np.arange(1, 2 ** num_symp + 1)
-        values, _ = np.histogram(combinations, bins=bins)
-        cooc_order = (-values).argsort()
-        num_cooc = np.minimum(num_cooc, len(np.where(values >= min_cooc_count)[0]))
-
-        fig, axs = plt.subplots(2, 2, sharex='col', sharey='row', figsize=(10, 5),
-                                gridspec_kw={'width_ratios': [1, 4], 'height_ratios': [2, 3],
-                                             'wspace': 0.55, 'hspace': 0.20, 'left': 0.04, 'right': 0.9})
-        for ax in axs.ravel():
-            for dir in ['left', 'right', 'top', 'bottom']:
-                ax.spines[dir].set_visible(False)
-        axs[0, 0].axis('off')
-
-        axs[0, 1].bar(range(num_cooc), values[cooc_order][:num_cooc], ec='white', color=color)
-        axs[0, 1].tick_params(labelbottom=True, labelleft=True, length=0)
-        axs[0, 1].tick_params(axis='x', rotation=90)
-        axs[0, 1].grid(True, axis='y', ls='--')
-        axs[0, 1].yaxis.set_major_locator(MaxNLocator(6))
-        axs[0, 1].axhline(0, color=color)
-        axs[0, 1].set_xlabel('Frecuencia de co-ocurrencias')
-
-
-        axs[1, 0].barh(np.array(symptoms)[symp_order], symp_sums[symp_order], ec='white', color=color)
-        axs[1, 0].tick_params(labelbottom=True, labelleft=False, left=False, length=0)
-        axs[1, 0].invert_xaxis()
-        axs[1, 0].grid(True, axis='x', ls='--')
-        axs[1, 0].xaxis.set_major_locator(MaxNLocator(4))
-        axs[1, 0].set_xlabel('Principales')
-
-        ax = axs[1, 1]
-        ax.tick_params(labelbottom=False, labelleft=True, length=0)
-        ax.set_xticks(range(num_cooc))
-        ax.set_xticklabels(values[cooc_order][:num_cooc])
-        ax.set_xlim(-1, num_cooc - 0.4)
-        for i, cooc in enumerate(bins[cooc_order][:num_cooc]):
-            ax.plot(np.full(num_symp, i), np.arange(num_symp), 'ob-', alpha=0.15, color=color)
-            occ = self.combined_number_to_list(cooc)
-            ax.plot(np.full_like(occ, i), occ, 'ob-', color=color)
-        axs[1, 1].set_xlabel('Co-ocurrencias')
-        fig.suptitle('Co-ocurrencias de síntomas asociados a COVID-19 (Urgencias, Marzo-Mayo 2020).'.format(len(occurrences)), fontsize=14)
-        # TODO: no funciona bien format='eps'
-        plt.savefig(os.path.join(HOME, self.plots_dir, filename))
-
-    def combined_number_to_list(self, cooc):
-        """convert a binary number to a list of its powers of two
-           e.g. 5 is converted to [0, 2] because 5 == 2**0 + 2**2"""
-        return [i for i in range(20) if cooc & (1 << i)]
-
+    def pictorial_stacked_chart(self, df, topn=5):
+        """https://www.amcharts.com/demos/pictorial-stacked-chart/"""
+        counts = df[df==True].count(axis=0)
+        dic_counts = Counter(counts.to_dict())
+        chart_data = [{"name": k, "value": v} for k,v in dic_counts.most_common(topn)]
+        return chart_data
 
 if __name__ == '__main__':
-
     # cut_directory = HOME+'/data/corte_SEDESA_13_mayo'
     cut_directory = sys.argv[1]
 
-    # excel table report
-    table_gen = TableGenerator()
-    (_,_,_,_) = table_gen.dir_to_excel(cut_directory, out_directory=None, only_covid=False)
-    # TODO repair
-    # plot_gen = PlotGenerator()
-    # short_df = symptoms_df.iloc[:, : 100]
-    # plot_gen.cooccurrences(short_df)
+    # build a excel report for all notes in a directory
+    report = ReportGenerator(cut_directory)
+    report.to_excel()
+
+    # data for amChart
+    amchart_gen = AmchartsGenerator()
+    am_symptoms = amchart_gen.pictorial_stacked_chart(report.df_symptoms, 10)
+    print(am_symptoms)
+    am_comorbs = amchart_gen.pictorial_stacked_chart(report.df_comorbs, 10)
+    print(am_comorbs)
+
