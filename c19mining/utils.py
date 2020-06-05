@@ -16,6 +16,8 @@ import pandas as pd
 # all paths to data resources are relative to the project home
 # this should be the only place to set them.
 HOME = str(Path(dirname(abspath(__file__))).parent)
+
+# Linguistic Medical Resources
 COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_MORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
@@ -28,13 +30,19 @@ WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
 COVID_DESEASE_DATA = 'resources/enf.csv'
 DRUGS_DATA = 'resources/drogas.txt'
 
-# OUTDIRS
-PLOTS_DIR = 'data/plots'
-EXCELS_DIR = 'data/excels'
+# UPLOADS DIRS
+ADMISSIONS_DIRNAME = 'xmls/ingresos'
+DISCHARGES_DIRNAME = 'xmls/egresos'
 UPLOAD_DIRNAME = 'data/uploads'
+# GENERATED DATA
+EXTRACTIONS_DIRNAME = 'extracciones'
+# OUTCOMES 
+EXCELS_DIR = 'excels'
+AMCHARTS_DIRNAME = 'amcharts'
+# BACK LOG SYSTEM
 LOG_DIRNAME = 'log'
 
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'jpg', 'jpeg'])
+ALLOWED_EXTENSIONS = set(['xml','txt', 'pdf', 'jpg', 'jpeg'])
 
 # These are the canonical names to concept
 
@@ -71,6 +79,31 @@ canonical_comorb_names = {
     'Q35869':   'asma',
     'Q15787':   'vih'
 }
+
+
+def admissions_dir():
+    path = join(HOME, ADMISSIONS_DIRNAME)
+    return path
+
+def discharges_dir():
+    path = join(HOME, DISCHARGES_DIRNAME)
+    return path
+
+def extractions_dir():
+    path = join(HOME, EXTRACTIONS_DIRNAME)
+    return path
+
+def amcharts_dir():
+    path = join(HOME, AMCHARTS_DIRNAME)
+    return path
+
+def excels_dir():
+    path = join(HOME, AMCHARTS_DIRNAME)
+    return path
+
+def uploads_dir():
+    path = join(HOME, UPLOAD_DIRNAME)
+    return path
 
 def canonical_symptoms_order():
     csymptoms_path = join(HOME, CANONICAL_SYMPTOMS)
@@ -261,12 +294,11 @@ def natural_keys(text):
     '''
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
-def uploads_dir():
-    uploads_path = join(HOME, UPLOAD_DIRNAME)
-    return uploads_path
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def allowed_xml_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ['xml','XML']
 
 def log_file():
     log_path = join(HOME, LOG_DIRNAME, 'error.log')
