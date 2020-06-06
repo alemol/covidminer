@@ -6,15 +6,15 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
+from c19mining.sedesa import XMLParser
 from c19mining.covid import MedNotesMiner
 from c19mining.ocr import TesseOCR
 from c19mining.utils import (uploads_dir, allowed_file, allowed_xml_file, log_file,
                              admissions_dir, discharges_dir, extractions_dir,
-                             amcharts_dir, excels_dir)
+                             amcharts_dir, excels_dir, get_time)
 
 import os
 from os.path import join, exists
-from datetime import datetime
 import logging
 from logging import Formatter, FileHandler
 import simplejson as json
@@ -41,37 +41,61 @@ my_ocr = TesseOCR(LANGUAGE)
 
 @app.route('/urgencias', methods=['POST'])
 def upload_xml_urgencias():
-    logging.info('* New xml urgencias requested *')
-    logging.info('Receiving file ...')
-    # check if the post request has the file part
+    datestamp = get_time()
+    logging.info('* New xml urgencias request: {} *'.format(datestamp))
+    # check if the post request has the xml file an upload it
+    uploaded_file = upload_check(request)
+    if not uploaded_file:
+        resp = jsonify({'message' : 'Not a valid file in the request'})
+        resp.status_code = 400
+        logging.info('Upload xml KO')
+        return resp
+    logging.info('Upload xml OK')
+    # copy file to app server
+    stored_xml_file = store_uploaded_file(uploaded_file, datestamp)
+    if not stored_xml_file:
+        resp = jsonify({'message' : 'Error copying the file on server'})
+        resp.status_code = 500
+        logging.info('Store xml KO')
+        return resp
+    logging.info('Store xml OK')
+    # extract covid insights from XML
+    datestamped_dir = join(app.config['EXTRACTIONS_DATA'], datestamp)
+    xmlparser = XMLParser(stored_xml_file)
+    xmlparser.covid_extraction(outputdir=datestamped_dir)
+    resp = jsonify({'message' : 'OK'})
+    resp.status_code = 200
+    return resp
+
+def upload_check(request):
+    logging.info('Uploading xml ...')
     if 'file' not in request.files:
-        resp = jsonify({'message' : 'No file part in the request'})
-        resp.status_code = 400
-        return resp
+        return None
     file = request.files['file']
-    if file.filename == '':
-        resp = jsonify({'message' : 'No file selected for uploading'})
-        resp.status_code = 400
-        return resp
-    if file and allowed_xml_file(file.filename):
-        logging.info(request.files)
-        filename = secure_filename(file.filename)
-        # creates datestamp dir an put the file there
-        now = datetime.now()
-        datestamp = now.strftime("%d_%m_%Y_%Hh%M")
-        path_datestamp = join(app.config['XMLS_INGRESOS'], datestamp)
-        if not exists(path_datestamp):
-            os.makedirs(path_datestamp)
-        file.save(join(app.config['XMLS_INGRESOS'], datestamp, filename))
-        logging.info('xml file uploaded to server: OK')
+    fname = file.filename
+    if fname == '':
+        return None
+    if not allowed_xml_file(fname):
+        return None
+    return file
+
+def store_uploaded_file(uploaded_file, datestamp):
+    logging.info('Storing xml ...')
+    fname = secure_filename(uploaded_file.filename)
+    path_datestamp = join(app.config['XMLS_INGRESOS'], datestamp)
+    if not exists(path_datestamp):
+        os.makedirs(path_datestamp)
+    inserver_path = join(app.config['XMLS_INGRESOS'], datestamp, fname)
+    uploaded_file.save(inserver_path)
+    if exists(inserver_path):
+        logging.info('"{}"'.format(inserver_path))
+        return inserver_path
     else:
-        resp = jsonify({'message' : 'Not Allowed file type'})
-        resp.status_code = 400
-        return resp
+        return None
 
 
 @app.route('/upload', methods=['POST'])
-def upload_file():
+def upload_any_file():
     # check if the post request has the file part
     if 'file' not in request.files:
         resp = jsonify({'message' : 'No file part in the request'})

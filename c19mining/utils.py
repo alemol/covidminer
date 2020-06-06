@@ -12,6 +12,7 @@ from os.path import (join, exists, dirname, abspath)
 from pathlib import Path
 from shutil import rmtree
 import pandas as pd 
+from datetime import datetime
 
 # all paths to data resources are relative to the project home
 # this should be the only place to set them.
@@ -80,6 +81,12 @@ canonical_comorb_names = {
     'Q15787':   'vih'
 }
 
+def get_time():
+    """creates datestamp """
+    now = datetime.now()
+    #datestamp = now.strftime("%d_%m_%Y_%Hh%M")
+    datestamp = now.strftime("%d_%m_%Y")
+    return datestamp
 
 def admissions_dir():
     path = join(HOME, ADMISSIONS_DIRNAME)
