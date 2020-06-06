@@ -105,7 +105,7 @@ def amcharts_dir():
     return path
 
 def excels_dir():
-    path = join(HOME, AMCHARTS_DIRNAME)
+    path = join(HOME, EXCELS_DIR)
     return path
 
 def uploads_dir():

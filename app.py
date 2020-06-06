@@ -8,6 +8,7 @@
 
 from c19mining.sedesa import XMLParser
 from c19mining.covid import MedNotesMiner
+from c19mining.report import ReportGenerator
 from c19mining.ocr import TesseOCR
 from c19mining.utils import (uploads_dir, allowed_file, allowed_xml_file, log_file,
                              admissions_dir, discharges_dir, extractions_dir,
@@ -60,9 +61,18 @@ def upload_xml_urgencias():
         return resp
     logging.info('Store xml OK')
     # extract covid insights from XML
-    datestamped_dir = join(app.config['EXTRACTIONS_DATA'], datestamp)
-    xmlparser = XMLParser(stored_xml_file)
-    xmlparser.covid_extraction(outputdir=datestamped_dir)
+    logging.info('Mining COVID-19 information ...')
+    #xmlparser = XMLParser(stored_xml_file)
+    #xmlparser.covid_extraction(outputdir=join(app.config['EXTRACTIONS_DATA'], datestamp))
+    logging.info('Mined COVID-19 information OK')
+    # build a excel report for all notes in a directory
+    logging.info('Writing excel report ...')
+    report = ReportGenerator(mednotes_dir=join(app.config['EXTRACTIONS_DATA'], datestamp),
+                             excels_dir=join(app.config['EXCEL_DATA'], datestamp),
+                             only_covid=False)
+    report.to_excel()
+    logging.info('Writen excel report OK')
+    # DONE!
     resp = jsonify({'message' : 'OK'})
     resp.status_code = 200
     return resp

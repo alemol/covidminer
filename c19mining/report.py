@@ -8,18 +8,17 @@
 
 import sys
 import os
-from os.path import (join, dirname)
+from os.path import (join, dirname, exists)
 sys.path.append(join(dirname(__file__), ".", ".."))
 
-from c19mining.utils import (HOME, PLOTS_DIR, EXCELS_DIR, explore_dir,
+from c19mining.utils import (HOME, EXCELS_DIR, explore_dir,
                              canonical_symptoms_name, canonical_symptoms_order,
                              canonical_comorbs_name, canonical_comorbs_order,
-                             canonical_covid_name)
+                             canonical_covid_name, get_time)
 import string
 import pandas as pd
 import simplejson as json
 from collections import Counter
-from datetime import datetime
 
 
 class ReportGenerator(object):
@@ -110,12 +109,11 @@ class ReportGenerator(object):
         """Read a set of JSON by MedNotesMiner to form a excel"""
 
         # path to generated excel
-        if not out_directory:
-            out_directory = self.excels_dir
-        now = datetime.now()
-        #dt_string = now.strftime("%d_%m_%Y_%Hh%M")
-        dt_string = now.strftime("%d_%m_%Y")
-        output = join(HOME, out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
+        if not exists(self.excels_dir):
+            os.makedirs(self.excels_dir)
+        dt_string = get_time()
+        out_directory = out_directory if out_directory else self.excels_dir
+        output = join(out_directory, 'informe_de_covid_'+dt_string+'.xlsx')
 
         # write excel file
         try:
@@ -211,10 +209,10 @@ class AmchartsGenerator(object):
 
 if __name__ == '__main__':
     # cut_directory = HOME+'/data/corte_SEDESA_13_mayo'
-    cut_directory = sys.argv[1]
+    notes_directory = sys.argv[1]
 
     # build a excel report for all notes in a directory
-    report = ReportGenerator(cut_directory)
+    report = ReportGenerator(notes_directory)
     report.to_excel()
 
     # data for amChart
