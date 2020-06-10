@@ -127,4 +127,3 @@ if __name__ == '__main__':
     # parse XML 
     xmlparser = XMLParser(inputxml)
     stamps = xmlparser.datestamps()
-    print(stamps)
