@@ -1,4 +1,7 @@
+![unit tests](https://github.com/alemol/covidminer/workflows/unit%20tests/badge.svg)
+
 # covidminer
+
 Text Mining Emergent Library for Information Extraction from Medical Notes in Spanish during COVID-19 pandemic
 
 
