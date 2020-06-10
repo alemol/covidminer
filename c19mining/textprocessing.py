@@ -15,6 +15,10 @@ import re
 from os.path import exists
 from mosestokenizer import *
 from nltk import word_tokenize
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
 
 
 class Tokenizer(object):
