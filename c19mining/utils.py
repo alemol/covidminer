@@ -15,10 +15,10 @@ import pandas as pd
 from datetime import datetime
 
 # all paths to data resources are relative to the project home
-# this should be the only place to set them.
+# this should be the only place to set paths.
 HOME = str(Path(dirname(abspath(__file__))).parent)
 
-# Linguistic Medical Resources
+# Medical Resources
 COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_MORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
@@ -31,15 +31,16 @@ WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
 COVID_DESEASE_DATA = 'resources/enf.csv'
 DRUGS_DATA = 'resources/drogas.txt'
 
+# Data
 # UPLOADS DIRS
-ADMISSIONS_DIRNAME = 'xmls/ingresos'
-DISCHARGES_DIRNAME = 'xmls/egresos'
+ADMISSIONS_DIRNAME = 'data/xmls/ingresos'
+DISCHARGES_DIRNAME = 'data/xmls/egresos'
 UPLOAD_DIRNAME = 'data/uploads'
 # GENERATED DATA
-EXTRACTIONS_DIRNAME = 'extracciones'
+EXTRACTIONS_DIRNAME = 'data/extracciones'
 # OUTCOMES 
-EXCELS_DIR = 'excels'
-AMCHARTS_DIRNAME = 'amcharts'
+EXCELS_DIR = 'data/excels'
+AMCHARTS_DIRNAME = 'data/amcharts'
 # BACK LOG SYSTEM
 LOG_DIRNAME = 'log'
 

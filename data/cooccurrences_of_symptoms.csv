@@ -1,8 +1,0 @@
-nota,fecha,fiebre,tos,fallo_respiratorio,sdra,disnea,cefalea,cansancio,diarrea,congestión_nasal,mialgia,hemoptisis,linfopenia,anemia,tormenta_de_citocinas,síndrome_gripal
-9663,22/04/2020,True,False,True,False,True,False,False,False,False,False,False,False,False,True,False
-2180,22/04/2020,False,False,True,False,True,False,False,False,False,False,False,False,False,False,False
-9101,22/04/2020,True,False,True,False,True,False,False,False,False,False,False,False,False,False,False
-0220,22/04/2020,False,False,False,False,True,True,False,False,False,False,False,False,False,False,False
-1217,22/04/2020,False,False,True,False,True,False,False,False,False,False,False,False,False,False,False
-9146,22/04/2020,False,False,True,False,True,False,False,False,False,False,False,False,False,False,False
-9319,22/04/2020,True,True,True,False,True,True,False,False,False,False,False,False,False,False,False
