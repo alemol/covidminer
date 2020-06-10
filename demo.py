@@ -108,9 +108,9 @@ EGO_BAC, ESCASAS, x campo, 0/64,
 EN ESPERA DE RECABAR MUESTRAS PARA PANEL VIRAL Y COVID 19.
 '''
 
-# When text extraction is needed you must apply the OCR class before mining the information.
-#my_ocr = TesseOCR('spa')
-#texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
+# When OCR is needed you must apply the get_text_from_pdf method of TesseOCR class before to get a string.
+# my_ocr = TesseOCR('spa')
+# texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
 
 # Information Extraction
 covid_seeker = MedNotesMiner(texto_urgencia)
