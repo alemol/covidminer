@@ -231,7 +231,7 @@ sudo apt-get install -y libpoppler-cpp-dev
 
 Functionality can be also used through lightweight web services implemented with Flask. However, the use of a professional Web Server Gateway Interface for professional applications is recommended.
 
-Having installed and configured what is necessary (see Dependencies section and docs/devnotes), you can run the server with the following command:
+Having installed and configured what is necessary (see Dependencies), you can run the server with the following command:
 
 
 ```
@@ -245,7 +245,7 @@ $python app.py
 INFO:  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
 ```
 
-Then, with the server running you can now make POST requests sending PDF files.
+Once the server is running you can make HTTP POST requests sending .txt or .pdf  files.
 
 ![HTTP POST request example](docs/imgs/post.png)
 
@@ -265,7 +265,7 @@ Then, with the server running you can now make POST requests sending PDF files.
 * [orcid](https://orcid.org/0000-0001-9398-8844)
 * [CONACyT-CentroGeo](http://mid.geoint.mx/site/integrante/id/15.html)
 
-See also the list of [contributors]() who participate in this project.
+See also the list of [contributors](docs/contributors) who participate in this project.
 
 ## Institutions
 
