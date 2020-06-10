@@ -169,7 +169,7 @@ When text extraction from PDF files without selectable text (or, even worst from
 from c19mining.ocr import TesseOCR
 
 my_ocr = TesseOCR('spa')
-texto_urgencia = my_ocr.get_text_from_pdf('data/notamed.pdf')
+texto_urgencia = my_ocr.get_text_from_pdf('data/test/notamed.pdf')
 
 ```
 

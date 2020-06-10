@@ -41,6 +41,8 @@ EXTRACTIONS_DIRNAME = 'data/extracciones'
 # OUTCOMES 
 EXCELS_DIR = 'data/excels'
 AMCHARTS_DIRNAME = 'data/amcharts'
+# Unittest
+TEST_TEXT = 'data/test/notamed.txt'
 # BACK LOG SYSTEM
 LOG_DIRNAME = 'log'
 
