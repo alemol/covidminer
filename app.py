@@ -6,9 +6,10 @@
 # This project is licensed under the MIT License - see the LICENSE file for details.
 # Copyright (c) 2020 Alejandro Molina Villegas
 
+
 from c19mining.sedesa import XMLParser
 from c19mining.covid import MedNotesMiner
-from c19mining.report import ReportGenerator
+from c19mining.report import ReportGenerator, AmchartsGenerator
 from c19mining.ocr import TesseOCR
 from c19mining.utils import (uploads_dir, allowed_file, allowed_xml_file, log_file,
                              admissions_dir, discharges_dir, extractions_dir,
@@ -22,6 +23,8 @@ import simplejson as json
 import urllib.request
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, redirect, render_template, abort
+import threading
+from glob import glob
 
 
 app = Flask(__name__)
@@ -29,21 +32,19 @@ app = Flask(__name__)
 # App Globals
 LANGUAGE = 'spa'
 app.config['JSON_AS_ASCII'] = False
-
 app.config['XMLS_INGRESOS'] = admissions_dir()
 app.config['XMLS_EGRESOS'] = discharges_dir()
 app.config['EXTRACTIONS_DATA'] = extractions_dir()
 app.config['AMCHARTS_DATA'] = amcharts_dir()
 app.config['EXCEL_DATA'] = excels_dir()
 app.config['UPLOAD_FOLDER'] = uploads_dir()
-
 my_ocr = TesseOCR(LANGUAGE)
 
 
-@app.route('/urgencias', methods=['POST'])
-def upload_xml_urgencias():
+@app.route('/ingresos', methods=['POST'])
+def upload_xml_ingresos():
     datestamp = get_time()
-    logging.info('* New xml urgencias request: {} *'.format(datestamp))
+    logging.info('* New xml ingresos request: {} *'.format(datestamp))
     # check if the post request has the xml file an upload it
     uploaded_file = upload_check(request)
     if not uploaded_file:
@@ -53,79 +54,113 @@ def upload_xml_urgencias():
         return resp
     logging.info('Upload xml OK')
     # copy file to app server
-    stored_xml_file = store_uploaded_file(uploaded_file, datestamp)
+    stored_xml_file = store_uploaded_file(uploaded_file, app.config['XMLS_INGRESOS'], datestamp)
     if not stored_xml_file:
         resp = jsonify({'message' : 'Error copying the file on server'})
         resp.status_code = 500
         logging.info('Store xml KO')
         return resp
-    logging.info('Store xml OK')
-    # extract covid insights from XML
-    logging.info('Mining COVID-19 information ...')
-    #xmlparser = XMLParser(stored_xml_file)
-    #xmlparser.covid_extraction(outputdir=join(app.config['EXTRACTIONS_DATA'], datestamp))
-    logging.info('Mined COVID-19 information OK')
-    # build a excel report for all notes in a directory
-    logging.info('Writing excel report ...')
-    report = ReportGenerator(mednotes_dir=join(app.config['EXTRACTIONS_DATA'], datestamp),
-                             excels_dir=join(app.config['EXCEL_DATA'], datestamp),
-                             only_covid=False)
-    report.to_excel()
-    logging.info('Writen excel report OK')
-    # DONE!
-    resp = jsonify({'message' : 'OK'})
+    logging.info('Stored xml OK')
+    # count valid records
+    xmlparser = XMLParser(stored_xml_file)
+    valid = xmlparser.count_valid_records(6)
+    # extract covid insights from XML in the background
+    # task_thread = threading.Thread(target=xmlparser.covid_extraction,
+    #     name='Thread-covid_{}'.format(datestamp),
+    #     kwargs={'outputdir': join(app.config['EXTRACTIONS_DATA'], datestamp)})
+    # task_thread.start()
+    # success
+    resp = jsonify({'xml_ingresos' : stored_xml_file,
+                    'valid_records': valid})
     resp.status_code = 200
     return resp
 
-def upload_check(request):
-    logging.info('Uploading xml ...')
-    if 'file' not in request.files:
-        return None
-    file = request.files['file']
-    fname = file.filename
-    if fname == '':
-        return None
-    if not allowed_xml_file(fname):
-        return None
-    return file
-
-def store_uploaded_file(uploaded_file, datestamp):
-    logging.info('Storing xml ...')
-    fname = secure_filename(uploaded_file.filename)
-    path_datestamp = join(app.config['XMLS_INGRESOS'], datestamp)
-    if not exists(path_datestamp):
-        os.makedirs(path_datestamp)
-    inserver_path = join(app.config['XMLS_INGRESOS'], datestamp, fname)
-    uploaded_file.save(inserver_path)
-    if exists(inserver_path):
-        logging.info('"{}"'.format(inserver_path))
-        return inserver_path
-    else:
-        return None
-
-
-@app.route('/upload', methods=['POST'])
-def upload_any_file():
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        resp = jsonify({'message' : 'No file part in the request'})
+@app.route('/egresos', methods=['POST'])
+def upload_xml_egresos():
+    datestamp = get_time()
+    logging.info('* New xml egresos request: {} *'.format(datestamp))
+    # check if the post request has the xml file an upload it
+    uploaded_file = upload_check(request)
+    if not uploaded_file:
+        resp = jsonify({'message' : 'Not a valid file in the request'})
         resp.status_code = 400
+        logging.info('Upload xml KO')
         return resp
-    file = request.files['file']
-    if file.filename == '':
-        resp = jsonify({'message' : 'No file selected for uploading'})
-        resp.status_code = 400
+    logging.info('Upload xml OK')
+    # copy file to app server
+    stored_xml_file = store_uploaded_file(uploaded_file, app.config['XMLS_EGRESOS'], datestamp)
+    if not stored_xml_file:
+        resp = jsonify({'message' : 'Error copying the file on server'})
+        resp.status_code = 500
+        logging.info('Store xml KO')
         return resp
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        resp = jsonify({'message' : 'File successfully uploaded'})
-        resp.status_code = 201
-        return resp
-    else:
-        resp = jsonify({'message' : 'Not Allowed file type'})
-        resp.status_code = 400
-        return resp
+    logging.info('Stored xml OK')
+    # count valid records
+    xmlparser = XMLParser(stored_xml_file)
+    valid = xmlparser.count_valid_records(7)
+    # success
+    resp = jsonify({'xml_egresos' : stored_xml_file,
+                    'valid_records': valid})
+    resp.status_code = 200
+    return resp
+
+@app.route('/textmining', methods=['POST'])
+def textmining():
+    datestamp = get_time()
+    # extract covid insights from XML in the background
+    admissions_xml = find_xml(app.config['XMLS_INGRESOS'], datestamp)
+    xmlparser = XMLParser(admissions_xml)
+    thread_name ='Thread-covid_{}'.format(datestamp)
+    extractions_dir = join(app.config['EXTRACTIONS_DATA'], datestamp)
+    task_thread = threading.Thread(target=xmlparser.covid_extraction,
+        name='Thread-covid_{}'.format(datestamp),
+        kwargs={'outputdir': extractions_dir})
+    task_thread.start()
+    # success
+    resp = jsonify({'thread' : thread_name,
+                    'extracciones': extractions_dir})
+    resp.status_code = 200
+    return resp
+
+@app.route('/reporte', methods=['POST'])
+def build_report():
+    datestamp = get_time()
+    report = ReportGenerator(mednotes_dir=join(app.config['EXTRACTIONS_DATA'], datestamp),
+                             excels_dir=join(app.config['EXCEL_DATA'], datestamp),
+                             only_covid=True)
+    report.to_excel()
+    logging.info('Writen excel report OK')
+    # data creation for charts
+    chart_dir = join(app.config['AMCHARTS_DATA'], datestamp)
+    amchart_gen = AmchartsGenerator()
+    am_symptoms = amchart_gen.pictorial_stacked_chart(report.df_symptoms, 10)
+    logging.info(am_symptoms)
+    am_comorbs = amchart_gen.pictorial_stacked_chart(report.df_comorbs, 10)
+    logging.info(am_comorbs)
+    # admissions and discharges
+    admissions_xml = find_xml(app.config['XMLS_INGRESOS'], datestamp)
+    xml_admissions = XMLParser(admissions_xml)
+    admissions_stamps = xml_admissions.datestamps()
+    #logging.info(admissions_stamps)
+    discharges_xml = find_xml(app.config['XMLS_EGRESOS'], datestamp)
+    #logging.info('discharges xml', discharges_xml)
+    xml_discharges = XMLParser(discharges_xml)
+    discharges_stamps = xml_discharges.datestamps()
+    #logging.info(discharges_stamps)
+    am_pyramid = amchart_gen.population_pyramid(admissions_stamps, discharges_stamps)
+    logging.info(am_pyramid)
+    # store data for charts
+    symp_path = write_chart_data(am_symptoms, chart_dir, 'am_symptoms.JSON')
+    comorbs_path = write_chart_data(am_comorbs, chart_dir, 'am_comorbs.JSON')
+    pyramid_path = write_chart_data(am_pyramid, chart_dir, 'am_pyramid.JSON')
+    # DONE!
+    resp = jsonify({'excel' : join(app.config['EXCEL_DATA'], datestamp, 'informe_de_covid_'+datestamp+'.xlsx'),
+                    'symptoms' : symp_path,
+                    'comorbs' : comorbs_path,
+                    'ingresos_egresos': pyramid_path
+                    })
+    resp.status_code = 200
+    return resp
 
 @app.route('/covid19', methods=["POST"])
 def covid19():
@@ -218,6 +253,46 @@ def ocr():
         abort(500)
 
     return ocred_text
+
+def upload_check(request):
+    logging.info('Uploading xml ...')
+    if 'file' not in request.files:
+        return None
+    file = request.files['file']
+    fname = file.filename
+    if fname == '':
+        return None
+    if not allowed_xml_file(fname):
+        return None
+    return file
+
+def store_uploaded_file(uploaded_file, upload_directory, datestamp):
+    logging.info('Storing xml ...')
+    fname = secure_filename(uploaded_file.filename)
+    path_datestamp = join(upload_directory, datestamp)
+    if not exists(path_datestamp):
+        os.makedirs(path_datestamp)
+    inserver_path = join(upload_directory, datestamp, fname)
+    uploaded_file.save(inserver_path)
+    if exists(inserver_path):
+        logging.info('"{}"'.format(inserver_path))
+        return inserver_path
+    else:
+        return None
+
+def write_chart_data(data, chart_dir, data_fname):
+    if not exists(chart_dir):
+        os.makedirs(chart_dir)
+    json_data_path = join(chart_dir, data_fname)
+    f = open(json_data_path, 'w')
+    json.dump(data, f)
+    f.close()
+    return json_data_path
+
+def find_xml(dir_xmls, datestamp):
+    stamped_dir = join(dir_xmls, datestamp)
+    xml_path = glob(stamped_dir+'/*xml')[0]
+    return xml_path
 
 @app.errorhandler(500)
 def internal_error(error):

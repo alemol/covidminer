@@ -19,6 +19,7 @@ import string
 import pandas as pd
 import simplejson as json
 from collections import Counter
+import datetime
 
 
 class ReportGenerator(object):
@@ -207,6 +208,35 @@ class AmchartsGenerator(object):
         chart_data = [{"name": k, "value": v} for k,v in dic_counts.most_common(topn)]
         return chart_data
 
+    def population_pyramid(self, admissions_dic, discharges_dic):
+        """https://www.amcharts.com/demos/population-pyramid/"""
+        chart_data = []
+
+        # sort by date to get start and end dates.
+        admissions_sorted_bydate = [date for (date,_) in sorted(admissions_dic.items(), key=lambda x: x[0])]
+        discharges_sorted_bydate = [date for (date,_) in sorted(discharges_dic.items(), key=lambda x: x[0])]
+        start_date = min(admissions_sorted_bydate[0], discharges_sorted_bydate[0])
+        end_date = max(admissions_sorted_bydate[-1], discharges_sorted_bydate[-1])
+        # day by day get admissions and discharges counts
+        d = start_date
+        while d < end_date:
+            try:
+                admissions = admissions_dic[d]
+            except:
+                admissions = 0
+                pass
+            try:
+                discharges = discharges_dic[d]
+            except:
+                discharges = 0
+                pass
+            chart_data.append({"fecha": d.strftime("%d/%m/%y"),
+                               "ingresos": admissions,
+                               "egresos": discharges})
+            d += datetime.timedelta(days=1)
+
+        return chart_data
+
 if __name__ == '__main__':
     # cut_directory = HOME+'/data/corte_SEDESA_13_mayo'
     notes_directory = sys.argv[1]
@@ -219,5 +249,3 @@ if __name__ == '__main__':
     amchart_gen = AmchartsGenerator()
     am_symptoms = amchart_gen.pictorial_stacked_chart(report.df_symptoms, 10)
     print(am_symptoms)
-    am_comorbs = amchart_gen.pictorial_stacked_chart(report.df_comorbs, 10)
-    print(am_comorbs)

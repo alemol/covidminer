@@ -31,17 +31,18 @@
 #     </ROW>
 #     ...
 
+import sys
+import os
+from os.path import (join, dirname, exists)
+sys.path.append(join(dirname(__file__), ".", ".."))
 
 from c19mining.covid import MedNotesMiner
 from c19mining.utils import extractions_dir
 
-import os
-import sys
 import re
-from os.path import join, exists
 import simplejson as json
 from bs4 import BeautifulSoup
-
+from datetime import datetime
 
 class XMLParser(object):
     """docstring for XMLParser"""
@@ -51,6 +52,35 @@ class XMLParser(object):
         infile = open(inputxml, 'r')
         contents = infile.read()
         self.xmlsoup = BeautifulSoup(contents, 'xml')
+
+    def count_valid_records(self, expected_fields):
+        """Count how many records are readable (valid)"""
+        counter = 0
+        for row in self.xmlsoup.find_all('ROW'):
+            fields = [col for col in row.find_all('COLUMN')]
+            if len(fields) == expected_fields:
+                counter += 1
+        return counter
+
+    def datestamps(self):
+        stamps = dict()
+        for row in self.xmlsoup.find_all('ROW'):
+            fields = [col for col in row.find_all('COLUMN')]
+            for f in fields:
+                m = re.search('INSERT_DATE', str(f))
+                if m:
+                    t = f.get_text()
+                    date_str = t.split(' ')[0]
+                    time_str = t.split(' ')[1]
+                    date = datetime(int(date_str.split('/')[2]),
+                                    int(date_str.split('/')[1]),
+                                    int(date_str.split('/')[0]),
+                                    )
+                    if date in stamps.keys():
+                        stamps[date]+= 1
+                    else:
+                        stamps[date] = 1        
+        return stamps
 
     def covid_extraction(self, outputdir=None):
         """Read each record from an XML to extract covid insights"""
@@ -92,10 +122,9 @@ class XMLParser(object):
                 continue
 
 if __name__ == '__main__':
-
     inputxml = sys.argv[1]
-    outdir = sys.argv[2]
 
     # parse XML 
     xmlparser = XMLParser(inputxml)
-    xmlparser.covid_extraction(outputdir=outdir)
+    stamps = xmlparser.datestamps()
+    print(stamps)

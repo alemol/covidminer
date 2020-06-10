@@ -162,7 +162,7 @@ Gives:
 When text extraction from PDF files without selectable text (or, even worst from images) is needed you must apply the OCR class included before mining the information.
 
 
-![notamed without selectable text](data/notamed.jpg)
+![notamed without selectable text](docs/imgs/notamed.jpg)
 
 
 ```
@@ -196,7 +196,7 @@ check this out
 
 ![excel generation](docs/imgs/excel2.png)
 
-![Pictorial_Stacked_Chart](plots/amcharts.png)
+![Pictorial_Stacked_Chart](docs/imgs/amcharts.png)
 
 
 ## Dependencies
@@ -247,7 +247,7 @@ INFO:  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
 
 Then, with the server running you can now make POST requests sending PDF files.
 
-![HTTP POST request example](docs/post.png)
+![HTTP POST request example](docs/imgs/post.png)
 
 
 ## Built With
