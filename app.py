@@ -187,72 +187,35 @@ def covid19():
         return resp
 
     # OCR stage
-    logging.info('OCR ...')
     try:
-        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        if 'pdf' in pdf_path:
-            logging.info(pdf_path)
-            ocred_text = my_ocr.get_text_from_pdf(pdf_path)
+        f_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if 'pdf' in f_path:
+            logging.info(f_path)
+            logging.info('OCR ...')
+            text = my_ocr.get_text_from_pdf(f_path)
             logging.info('OCR OK')
+        elif 'txt' in f_path:
+            with open(f_path, 'r') as f:
+                text = f.read()
         else:
-            return jsonify({"error": "only .pdf files, please"})
+            return jsonify({"error": "only .pdf or .txt files can be processed."})
     except:
         abort(500)
 
     # symptoms stage
-    covid_seeker = MedNotesMiner(ocred_text)
+    covid_seeker = MedNotesMiner(text)
     try:
         covid_seeker.check_covid19()
         covid_seeker.check_symptoms()
         covid_seeker.check_sampling()
         covid_seeker.check_decease()
         covid_seeker.check_comorbidities()
-        jsons =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
-        logging.info('OCR OK')
+        json_resp =  json.dumps(covid_seeker.clues, ensure_ascii=False, encoding='utf-8', indent=2)
         logging.info('Text Mining OK')
-        return(jsons)
+        return(json_resp)
     except Exception as e:
         logging.info(e)
         abort(500)
-
-@app.route('/ocr', methods=["POST"])
-def ocr():
-    logging.info('*OCR request.files*')
-    logging.info('Receiving file ...')
-    logging.info(request.files)
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        resp = jsonify({'message' : 'No file part in the request'})
-        resp.status_code = 400
-        return resp
-    file = request.files['file']
-    if file.filename == '':
-        resp = jsonify({'message' : 'No file selected for uploading'})
-        resp.status_code = 400
-        return resp
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        logging.info('File OK')
-    else:
-        resp = jsonify({'message' : 'Not Allowed file type'})
-        resp.status_code = 400
-        return resp
-
-    # OCR stage
-    logging.info('OCR ...')
-    try:
-        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        if 'pdf' in pdf_path:
-            logging.info(pdf_path)
-            ocred_text = my_ocr.get_text_from_pdf(pdf_path)
-            logging.info('OCR OK')
-        else:
-            return jsonify({"error": "only .pdf files, please"})
-    except:
-        abort(500)
-
-    return ocred_text
 
 def upload_check(request):
     logging.info('Uploading xml ...')
