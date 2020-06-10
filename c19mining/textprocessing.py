@@ -14,11 +14,13 @@ from c19mining.utils import (wiki_deseases_regex, wiki_symptoms_regex, drugs_reg
 import re
 from os.path import exists
 from mosestokenizer import *
-from nltk import word_tokenize
+
+import nltk
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
     nltk.download('punkt')
+from nltk import word_tokenize
 
 
 class Tokenizer(object):
