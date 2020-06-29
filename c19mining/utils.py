@@ -22,14 +22,13 @@ HOME = str(Path(dirname(abspath(__file__))).parent)
 COVID19_DATA = 'resources/covid19.csv'
 COVID19_SYMPTOMS_DATA = 'resources/covid19_sintomas.csv'
 COVID19_MORBIDITIES_DATA = 'resources/covid19_comorbilidades.csv'
-COVID19_SAMPLING = 'resources/muestras.txt'
-COVID19_DECEASE = 'resources/decesos.txt'
 WIKI_SYMPTOMS_DATA = 'resources/sintomas_wikidata.csv'
 CANONICAL_SYMPTOMS = 'resources/canonical_symptoms.csv'
 CANONICAL_COMORBS = 'resources/canonical_comorbilidades.csv'
-WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
-COVID_DESEASE_DATA = 'resources/enf.csv'
-DRUGS_DATA = 'resources/drogas.txt'
+#WIKI_DESEASES_DATA = 'resources/enfermedad_wikidata.csv'
+DRUGS_DATA = 'resources/drogas.csv'
+COVID19_SAMPLING = 'resources/muestras.txt'
+COVID19_DECEASE = 'resources/decesos.txt'
 
 # Data
 # UPLOADS DIRS
@@ -170,11 +169,6 @@ def wiki_symptoms_regex():
     regex = csv2regex(symptoms_path)
     return regex
 
-def covid_deseases_regex():
-    data_path = join(HOME, COVID_DESEASE_DATA)
-    regex = csv2regex(data_path)
-    return regex
-
 def wiki_deseases_regex():
     data_path = join(HOME, WIKI_DESEASES_DATA)
     regex = csv2regex(data_path)
@@ -202,6 +196,16 @@ def context_symptoms_regex():
 
 def symptoms_namedict():
     data_path = join(HOME, WIKI_SYMPTOMS_DATA)
+    namedict = load_names_dict(data_path)
+    return namedict
+
+def context_drugs_regex():
+    data_path = join(HOME, DRUGS_DATA)
+    regex = csv2contextregex(data_path)
+    return regex
+
+def drugs_namedict():
+    data_path = join(HOME, DRUGS_DATA)
     namedict = load_names_dict(data_path)
     return namedict
 

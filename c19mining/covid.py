@@ -16,7 +16,8 @@ from c19mining.utils import (HOME, explore_dir,
                              covid19, covid_namedict,
                              context_morbidities_regex, morbidities_namedict,
                              context_symptoms_regex, symptoms_namedict,
-                             context_deseases_regex, deseases_namedict)
+                             context_deseases_regex, deseases_namedict,
+                             context_drugs_regex, drugs_namedict)
 import re
 import pandas as pd
 import simplejson as json
@@ -37,6 +38,8 @@ class MedNotesMiner(object):
         self.covid_dict = covid_namedict()
         self.symptoms_re = context_symptoms_regex()
         self.symptoms_dict = symptoms_namedict()
+        self.drugs_re = context_drugs_regex()
+        self.drugs_dict = drugs_namedict()
         self.morbidities_re = context_morbidities_regex()
         self.morbidities_dict = morbidities_namedict()
 
@@ -92,6 +95,24 @@ class MedNotesMiner(object):
                 self.clues['síntomas'][symptom_key] = [symptom_info]
             else:
                 self.clues['síntomas'][symptom_key].append(symptom_info)
+
+    def check_drugs(self, lower_case=True):
+        """match covid-19 symptoms"""
+        self.clues['medicamentos'] = {}
+
+        # seek for matches
+        for drugs_mention in self.drugs_re.finditer(self.working_text):
+            context_mention = '...'+(drugs_mention.groups()[0]).replace('\n', ' ')+'...'
+            drug_name = drugs_mention.groups()[2]
+            drug_key = self.drugs_dict[drug_name]
+            drug_info = {'descripción': drugs_mention.groups()[2],
+                            'mención': context_mention,
+                            'SAICA': '{}'.format(drug_key)}
+
+            if not drug_key in self.clues['medicamentos']:
+                self.clues['medicamentos'][drug_key] = [drug_info]
+            else:
+                self.clues['medicamentos'][drug_key].append(drug_info)
 
     def check_comorbidities(self, lower_case=True):
         """match covid-19 comorbidities"""

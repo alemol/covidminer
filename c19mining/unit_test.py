@@ -19,6 +19,7 @@ class TestMedNotesMiner:
         miner.check_covid19()
         miner.check_symptoms()
         miner.check_comorbidities()
+        miner.check_drugs()
         extracted_sections = miner.clues.keys()
         for section in ["texto", "COVID-19", "síntomas", "comorbilidades"]:
             assert section in extracted_sections
